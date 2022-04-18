@@ -21,14 +21,21 @@ namespace TestsDesigner
     /// </summary>
     public partial class MainWindow : Window
     {
+        public Test currentTest;
         public MainWindow()
         {
             InitializeComponent();
         }
-
-        private void NewTextBtn_Click(object sender, RoutedEventArgs e)
+        private void NewTestBtn_Click(object sender, RoutedEventArgs e)
         {
-
+            AuthorTextBox.Clear();
+            TitleTextBox.Clear();
+            DescTextBox.Clear();
+            QuestCountTextBox.Text = "0";
+            MaxPointTextBox.Text = "0";
+            PassPercTextBox.Text = "0";
         }
+
+       
     }
 }

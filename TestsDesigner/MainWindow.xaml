@@ -14,8 +14,8 @@
 
         <Menu Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Left" Background="CornflowerBlue">
             <MenuItem Header="File" FontWeight="Bold" Width="40" Height="25" BorderThickness="5">
-                <MenuItem Header="Create new test" Background="White" Name="NewTextBtn" Click="NewTextBtn_Click"/>
-                <MenuItem Header="Open test" Background="White" Name="OpenTextBtn"/>
+                <MenuItem Header="Create new test" Background="White" Name="NewTestBtn" Click="NewTestBtn_Click"/>
+                <MenuItem Header="Open test" Background="White" Name="OpenTestBtn"/>
                 <MenuItem Header="Save test" Background="White" Name="SaveTestBtn"/>
                 <MenuItem Header="Close test" Background="White" Name="CloseTestBtn"/>
                 <Separator/>
@@ -67,11 +67,11 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Content="Count of questions:" VerticalAlignment="Center" IsEnabled="False"/>
-                    <TextBox Grid.Row="0" Grid.Column="1" Height="25" Name="QuestCountTextBox"/>
+                    <Label Grid.Row="0" Grid.Column="0" Content="Count of questions:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" Height="25" Name="QuestCountTextBox" IsReadOnly="True"/>
 
-                    <Label Grid.Row="1" Grid.Column="0" Content="Max points for test:" VerticalAlignment="Center" IsEnabled="False"/>
-                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Name="MaxPointTextBox"/>
+                    <Label Grid.Row="1" Grid.Column="0" Content="Max points for test:" VerticalAlignment="Center"/>
+                    <TextBox Grid.Row="1" Grid.Column="1" Height="25" Name="MaxPointTextBox" IsReadOnly="True"/>
 
                     <Label Grid.Row="2" Grid.Column="0" Content="Passing percent:" VerticalAlignment="Center"/>
                     <TextBox Grid.Row="2" Grid.Column="1" Height="25" Name="PassPercTextBox"/>
