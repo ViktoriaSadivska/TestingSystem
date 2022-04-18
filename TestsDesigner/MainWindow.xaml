@@ -98,7 +98,12 @@
 
                     <StackPanel Grid.Column="1" Orientation="Vertical">
                         <Label Content="Answers for the question:"/>
-                        <DataGrid Background="White" Margin="4" Name="AnswersGrid" Height="160" VerticalScrollBarVisibility="Visible"/>
+                        <DataGrid Background="White" Margin="4" Name="AnswersGrid" Height="160" VerticalScrollBarVisibility="Visible">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Text of answer" Width="3*"/>
+                                <DataGridCheckBoxColumn Header="Answer is true" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
                     </StackPanel>
                 </Grid>
 
@@ -108,7 +113,13 @@
                     <Button Margin="4" Content="  Delete question  " Background="White" Name="DeleteQuestnBtn"/>
                 </StackPanel>
 
-                <DataGrid Grid.Row="1" Background="White" Margin="4" Name="QuestionGrid" VerticalScrollBarVisibility="Visible"/>
+                <DataGrid Grid.Row="1" Background="White" Margin="4" Name="QuestionGrid" VerticalScrollBarVisibility="Visible">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Text of the question" Width="3*"/>
+                        <DataGridTextColumn Header="Points" Width="*"/>
+                        <DataGridTextColumn Header="Count of answers" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
 
         </Grid>
