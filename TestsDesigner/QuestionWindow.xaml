@@ -5,49 +5,50 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestsDesigner"
         mc:Ignorable="d"
-        Title="Add new question" Height="450" Width="593">
+        Title="Add new question" Height="473" Width="593">
     <Grid Background="LightSteelBlue">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="237*"/>
+            <ColumnDefinition Width="30*"/>
+            <ColumnDefinition Width="326*"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Orientation="Vertical" Margin="5">
+        <StackPanel Grid.Column="0" Orientation="Vertical" Margin="5,5,5,5">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Text of question:"/>
                 <Label Content="" Name="TextQuestionErrorLabel" Foreground="Red"/>
             </StackPanel>
             <TextBox Name="TextQstnTextBox" Height="50"/>
             <Label Content="Points:"/>
-            <TextBox Name="PointsTextBox"/>
+            <TextBox Name="PointsTextBox" Text="0"/>
             <Label Content="Image for question:"/>
-            <InkCanvas Background="White"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Content="Load image.." Name="LoadImageBtn" Background="AliceBlue" Width="100" Margin="6"/>
+            <InkCanvas Background="White" Width="229"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="41">
+                <Button Content="Load image.." Name="LoadImageBtn" Background="AliceBlue" Width="100" Margin="6" Click="LoadImageBtn_Click"/>
                 <Button Content="Clear image" Name="ClearImageBtn" Background="AliceBlue" Width="100" Margin="6"/>
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Margin="5">
+        <StackPanel Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Answers:"/>
                 <Label Content="" Name="TextAnswerErrorLabel" Foreground="Red"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" >
-                <Button Content="Add" Name="AddAnswerBtn" Width="105" Margin="5" Background="AliceBlue"/>
-                <Button Content="Edit" Name="EditAnswerBtn" Width="105" Margin="5" Background="AliceBlue"/>
-                <Button Content="Delete" Name="DeleteAnswerBtn" Width="105" Margin="5" Background="AliceBlue"/>
+                <Button Content="Add" Name="AddAnswerBtn" Width="105" Margin="5" Background="AliceBlue" Click="AddAnswerBtn_Click"/>
+                <Button Content="Edit" Name="EditAnswerBtn" Width="105" Margin="5" Background="AliceBlue" Click="EditAnswerBtn_Click"/>
+                <Button Content="Delete" Name="DeleteAnswerBtn" Width="105" Margin="5" Background="AliceBlue" Click="DeleteAnswerBtn_Click"/>
             </StackPanel>
-            <DataGrid Background="White" Name="AnswersGrid" Height="340">
+            <DataGrid Background="White" Name="AnswersGrid" Height="340" AutoGenerateColumns="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Text of answer" Width="3*"/>
-                    <DataGridCheckBoxColumn Header="Answer is true" Width="*"/>
+                    <DataGridTextColumn Header="Text of answer" Binding="{Binding Text}" Width="3*"/>
+                    <DataGridCheckBoxColumn Header="Answer is true" Binding="{Binding IsTrue}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Save" Name="SaveeBtn" Background="AliceBlue" Width="120" Margin="6"/>
-                <Button Content="Cancel" Name="CancelBtn" Background="AliceBlue" Width="120" Margin="6"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Height="38">
+                <Button Content="Save" Name="SaveeBtn" Background="AliceBlue" Width="120" Margin="6" Click="SaveeBtn_Click"/>
+                <Button Content="Cancel" Name="CancelBtn" Background="AliceBlue" Width="120" Margin="6" Click="CancelBtn_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>

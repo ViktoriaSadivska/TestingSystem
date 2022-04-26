@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestsDesigner"
         mc:Ignorable="d"
-        Title="Add new answer" Height="183" Width="271">
+        Title="Add new answer" Height="207" Width="271">
     <Grid Background="AliceBlue">
-        <StackPanel Margin="5">
+        <StackPanel Margin="5,5,5,0">
             <Label Content="Answer:"/>
             <TextBox Name="AnswerTextBox" Height="70" Margin="3"/>
-            <CheckBox Content="answer is true" Margin="5"/>
+            <CheckBox Content="answer is true" Margin="5" Name="IsTrueChckBoc"/>
             <StackPanel Orientation="Horizontal">
-                <Button Content="Save" Name="SaveBtn" Margin="5" Width="120" Background="LightSteelBlue"/>
-                <Button Content="Cancel" Name="CancelBtn" Margin="5" Width="120" Background="LightSteelBlue"/>
+                <Button Content="Save" Name="SaveBtn" Margin="5" Width="120" Background="LightSteelBlue" Click="SaveBtn_Click"/>
+                <Button Content="Cancel" Name="CancelBtn" Margin="5" Width="120" Background="LightSteelBlue" Click="CancelBtn_Click"/>
             </StackPanel>
         </StackPanel>
     </Grid>
