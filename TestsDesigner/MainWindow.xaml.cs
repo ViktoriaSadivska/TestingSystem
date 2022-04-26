@@ -32,6 +32,7 @@ namespace TestsDesigner
             currentTest = new Test();
         }
 
+        //Initializeers
         private void InitializeDirectories()
         {
             string currentPath = Directory.GetCurrentDirectory();
@@ -42,27 +43,78 @@ namespace TestsDesigner
             if (!Directory.Exists(System.IO.Path.Combine(currentPath, "Tests")))
                 Directory.CreateDirectory(System.IO.Path.Combine(currentPath, "Tests"));
         }
-
-        private int CountPoints()
+        private void InitializeFields()
         {
-            int maxPoints = 0;
-            foreach (var item in currentTest.Questions)
-            {
-                maxPoints += item.Points;
-            }
-
-            return maxPoints;
+            AuthorTextBox.Text = currentTest.Author;
+            TitleTextBox.Text = currentTest.Title;
+            DescTextBox.Text = currentTest.Description;
+            QuestCountTextBox.Text = currentTest.Questions.Count.ToString();
+            MaxPointTextBox.Text = CountPoints().ToString();
+            PassPercTextBox.Text = currentTest.PassingPercent.ToString();
+            QuestionGrid.ItemsSource = currentTest.Questions;
+            AnswersGrid.ItemsSource = null;
+            TestImage.Source = null;
         }
+
+        //Menu buttons
         private void NewTestBtn_Click(object sender, RoutedEventArgs e)
         {
             currentTest = new Test();
             InitializeFields();
         }
+        private void SaveTestBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                currentTest.Title = TitleTextBox.Text;
+                currentTest.Author = AuthorTextBox.Text;
+                currentTest.Description = DescTextBox.Text;
+                currentTest.PassingPercent = Convert.ToInt32(PassPercTextBox.Text);
 
+                XmlSerializer writer = new XmlSerializer(typeof(Test));
+                FileStream file = File.Create(Directory.GetCurrentDirectory() + @"\Tests\" + $"{currentTest.Title}_{currentTest.Author}.xml");
+                writer.Serialize(file, currentTest);
+                file.Close();
+
+                currentTest = new Test();
+                InitializeFields();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an error while trying to save the test");
+            }
+        }
+        private void OpenTestBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                OpenFileDialog fileDialog = new OpenFileDialog();
+                fileDialog.Filter = "Tests|*.xml;";
+                fileDialog.InitialDirectory = Directory.GetCurrentDirectory() + @"\Tests\";
+                if (fileDialog.ShowDialog().Value)
+                {
+                    using (Stream reader = new FileStream(fileDialog.FileName, FileMode.Open))
+                    {
+                        currentTest = (Test)new XmlSerializer(typeof(Test)).Deserialize(reader);
+                    }
+                    InitializeFields();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an error while trying to open the test");
+            }
+        }
+        private void ExitBtn_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        //Questions actions buttons
         private void AddQuestnBtn_Click(object sender, RoutedEventArgs e)
         {
             QuestionWindow window = new QuestionWindow();
-            if(window.ShowDialog().Value)
+            if (window.ShowDialog().Value)
             {
                 currentTest.Questions.Add(window.question);
 
@@ -72,9 +124,8 @@ namespace TestsDesigner
 
                 QuestCountTextBox.Text = currentTest.Questions.Count.ToString();
                 MaxPointTextBox.Text = CountPoints().ToString();
-            } 
+            }
         }
-
         private void EditQuestnBtn_Click(object sender, RoutedEventArgs e)
         {
             if (QuestionGrid.SelectedIndex >= 0 && QuestionGrid.SelectedIndex < currentTest.Questions.Count)
@@ -95,7 +146,6 @@ namespace TestsDesigner
                 }
             }
         }
-
         private void DeleteQuestnBtn_Click(object sender, RoutedEventArgs e)
         {
             if (QuestionGrid.SelectedIndex >= 0 && QuestionGrid.SelectedIndex < currentTest.Questions.Count)
@@ -124,71 +174,18 @@ namespace TestsDesigner
                     BitmapImage bitmap = new BitmapImage(uri);
                     TestImage.Source = bitmap;
                 }
-                catch(Exception ex) { }
+                catch (Exception ex) { }
             }
         }
-
-        private void SaveTestBtn_Click(object sender, RoutedEventArgs e)
+        private int CountPoints()
         {
-            try
+            int maxPoints = 0;
+            foreach (var item in currentTest.Questions)
             {
-                currentTest.Title = TitleTextBox.Text;
-                currentTest.Author = AuthorTextBox.Text;
-                currentTest.Description = DescTextBox.Text;
-                currentTest.PassingPercent = Convert.ToInt32(PassPercTextBox.Text);
-
-                XmlSerializer writer = new XmlSerializer(typeof(Test));
-                FileStream file = File.Create(Directory.GetCurrentDirectory() + @"\Tests\" + $"{currentTest.Title}_{currentTest.Author}.xml");
-                writer.Serialize(file, currentTest);
-                file.Close();
-
-                currentTest = new Test();
-                InitializeFields();
+                maxPoints += item.Points;
             }
-            catch(Exception ex)
-            {
-                MessageBox.Show("There was an error while trying to save the test");
-            }
-        }
 
-        private void OpenTestBtn_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                OpenFileDialog fileDialog = new OpenFileDialog();
-                fileDialog.Filter = "Tests|*.xml;";
-                fileDialog.InitialDirectory = Directory.GetCurrentDirectory() + @"\Tests\";
-                if (fileDialog.ShowDialog().Value)
-                {
-                    using (Stream reader = new FileStream(fileDialog.FileName, FileMode.Open))
-                    {
-                        currentTest = (Test)new XmlSerializer(typeof(Test)).Deserialize(reader);
-                    }
-                    InitializeFields();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("There was an error while trying to open the test");
-            }
-        }
-
-        private void InitializeFields()
-        {
-            AuthorTextBox.Text = currentTest.Author;
-            TitleTextBox.Text = currentTest.Title;
-            DescTextBox.Text = currentTest.Description;
-            QuestCountTextBox.Text = currentTest.Questions.Count.ToString();
-            MaxPointTextBox.Text = CountPoints().ToString();
-            PassPercTextBox.Text = currentTest.PassingPercent.ToString();
-            QuestionGrid.ItemsSource = currentTest.Questions;
-            AnswersGrid.ItemsSource = null;
-            TestImage.Source = null;
-        }
-
-        private void ExitBtn_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
+            return maxPoints;
         }
     }
 }

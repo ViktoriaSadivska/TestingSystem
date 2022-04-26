@@ -23,17 +23,15 @@ namespace TestsDesigner
     {
         public Question question { get; set; }
         public string ImagePath;
+
+        //Form initializers
         public QuestionWindow()
         {
             InitializeComponent();
 
             question = new Question();
-        }
-        private void FillImage(string ImagePath)
-        {
-            Uri uri = new Uri(ImagePath);
-            BitmapImage bitmap = new BitmapImage(uri);
-            QstnImage.Source = bitmap;
+            CheckQstnText();
+            CheckAnswers();
         }
         public QuestionWindow(Question question)
         {
@@ -47,8 +45,51 @@ namespace TestsDesigner
             {
                 FillImage(System.IO.Path.Combine(new string[] { Directory.GetCurrentDirectory(), "Images", question.ImageName }));
             }
-            catch(Exception ex) { }
+            catch (Exception ex) { }
         }
+
+        //Answers actions buttons
+        private void AddAnswerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            AnswerWindow window = new AnswerWindow();
+            if (window.ShowDialog().Value)
+            {
+                question.Answers.Add(window.Answer);
+                AnswersGrid.ItemsSource = null;
+                AnswersGrid.ItemsSource = question.Answers;
+
+                CheckAnswers();
+            }
+        }
+        private void EditAnswerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnswersGrid.SelectedIndex >= 0 && AnswersGrid.SelectedIndex < question.Answers.Count)
+            {
+                AnswerWindow window = new AnswerWindow(question.Answers[AnswersGrid.SelectedIndex]);
+                if (window.ShowDialog().Value)
+                {
+                    question.Answers[AnswersGrid.SelectedIndex].Text = window.Answer.Text;
+                    question.Answers[AnswersGrid.SelectedIndex].IsTrue = window.Answer.IsTrue;
+                    AnswersGrid.ItemsSource = null;
+                    AnswersGrid.ItemsSource = question.Answers;
+
+                    CheckAnswers();
+                }
+            }
+        }
+        private void DeleteAnswerBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (AnswersGrid.SelectedIndex >= 0 && AnswersGrid.SelectedIndex < question.Answers.Count)
+            {
+                question.Answers.RemoveAt(AnswersGrid.SelectedIndex);
+                AnswersGrid.ItemsSource = null;
+                AnswersGrid.ItemsSource = question.Answers;
+
+                CheckAnswers();
+            }
+        }
+
+        //Image actions
         private void LoadImageBtn_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
@@ -60,64 +101,67 @@ namespace TestsDesigner
                 this.ImagePath = fileDialog.FileName;
             }
         }
-
-        private void AddAnswerBtn_Click(object sender, RoutedEventArgs e)
+        private void ClearImageBtn_Click(object sender, RoutedEventArgs e)
         {
-            AnswerWindow window = new AnswerWindow();
-            if (window.ShowDialog().Value)
-            {
-                question.Answers.Add(window.Answer);
-                AnswersGrid.ItemsSource = null;
-                AnswersGrid.ItemsSource = question.Answers;
-            }
+            QstnImage.Source = null;
+            question.ImageName = null;
+        }
+        private void FillImage(string ImagePath)
+        {
+            Uri uri = new Uri(ImagePath);
+            BitmapImage bitmap = new BitmapImage(uri);
+            QstnImage.Source = bitmap;
         }
 
-        private void EditAnswerBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if(AnswersGrid.SelectedIndex >= 0 && AnswersGrid.SelectedIndex < question.Answers.Count)
-            {
-                AnswerWindow window = new AnswerWindow(question.Answers[AnswersGrid.SelectedIndex]);
-                if (window.ShowDialog().Value)
-                {
-                    question.Answers[AnswersGrid.SelectedIndex].Text = window.Answer.Text;
-                    question.Answers[AnswersGrid.SelectedIndex].IsTrue = window.Answer.IsTrue;
-                    AnswersGrid.ItemsSource = null;
-                    AnswersGrid.ItemsSource = question.Answers;
-                }
-            }
-        }
-
-        private void DeleteAnswerBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (AnswersGrid.SelectedIndex >= 0 && AnswersGrid.SelectedIndex < question.Answers.Count)
-            {
-                question.Answers.RemoveAt(AnswersGrid.SelectedIndex);
-                AnswersGrid.ItemsSource = null;
-                AnswersGrid.ItemsSource = question.Answers;
-            }
-        }
-
+        //Save question/Cancel buttons
         private void SaveeBtn_Click(object sender, RoutedEventArgs e)
         {
-            question.Text = TextQstnTextBox.Text;
-            question.Points = Convert.ToInt32(PointsTextBox.Text);
-            if(question.ImageName != null)
-                File.Copy(this.ImagePath, Directory.GetCurrentDirectory() + @"\Images\" + question.ImageName, true);
+            if (CheckAnswers() && CheckQstnText())
+            {
+                question.Text = TextQstnTextBox.Text;
+                question.Points = Convert.ToInt32(PointsTextBox.Text);
+                if (question.ImageName != null)
+                    File.Copy(this.ImagePath, Directory.GetCurrentDirectory() + @"\Images\" + question.ImageName, true);
 
-            DialogResult = true;
-            this.Close();
+                DialogResult = true;
+                this.Close();
+            }
         }
-
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
             this.Close();
         }
 
-        private void ClearImageBtn_Click(object sender, RoutedEventArgs e)
+        //Check questn accuracy
+        private bool CheckAnswers()
         {
-            QstnImage.Source = null;
-            question.ImageName = null;
+            foreach (var answer in question.Answers)
+            {
+                if (answer.IsTrue)
+                {
+                    TextAnswerErrorLabel.Content = "";
+                    return true;
+                }
+            }
+            TextAnswerErrorLabel.Content = "Incorrect, at least one answer must be true";
+            return false;
+        }
+        private bool CheckQstnText()
+        {
+            if (TextQstnTextBox.Text == "")
+            {
+                TextQuestionErrorLabel.Content = "Incorrect, text is empty";
+                return false;
+            }
+            else 
+                TextQuestionErrorLabel.Content = "";
+            return true;
+        }
+
+        private void TextQstnTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            CheckQstnText();
         }
     }
 }

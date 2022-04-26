@@ -19,6 +19,8 @@ namespace TestsDesigner
     public partial class AnswerWindow : Window
     {
         public Answer Answer { get; set; }
+
+        //Form initializers
         public AnswerWindow()
         {
             InitializeComponent();
@@ -30,13 +32,14 @@ namespace TestsDesigner
             AnswerTextBox.Text = answer.Text;
             IsTrueChckBoc.IsChecked = answer.IsTrue;
         }
+
+        //Save answer/Cancel buttons
         private void SaveBtn_Click(object sender, RoutedEventArgs e)
         {
             Answer = new Answer { Text = AnswerTextBox.Text, IsTrue = IsTrueChckBoc.IsChecked.Value };
             DialogResult = true;
             this.Close();
         }
-
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
