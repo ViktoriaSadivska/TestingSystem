@@ -22,10 +22,10 @@
             <Label Content="Points:"/>
             <TextBox Name="PointsTextBox" Text="0"/>
             <Label Content="Image for question:"/>
-            <InkCanvas Background="White" Width="229"/>
+            <Image Height="250" Width="200" Name="QstnImage"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Height="41">
                 <Button Content="Load image.." Name="LoadImageBtn" Background="AliceBlue" Width="100" Margin="6" Click="LoadImageBtn_Click"/>
-                <Button Content="Clear image" Name="ClearImageBtn" Background="AliceBlue" Width="100" Margin="6"/>
+                <Button Content="Clear image" Name="ClearImageBtn" Background="AliceBlue" Width="100" Margin="6" Click="ClearImageBtn_Click"/>
             </StackPanel>
         </StackPanel>
 

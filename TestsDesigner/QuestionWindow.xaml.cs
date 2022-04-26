@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using TestLib;
+using System.IO;
 
 namespace TestsDesigner
 {
@@ -19,11 +22,18 @@ namespace TestsDesigner
     public partial class QuestionWindow : Window
     {
         public Question question { get; set; }
+        public string ImagePath;
         public QuestionWindow()
         {
             InitializeComponent();
 
             question = new Question();
+        }
+        private void FillImage(string ImagePath)
+        {
+            Uri uri = new Uri(ImagePath);
+            BitmapImage bitmap = new BitmapImage(uri);
+            QstnImage.Source = bitmap;
         }
         public QuestionWindow(Question question)
         {
@@ -33,10 +43,22 @@ namespace TestsDesigner
             TextQstnTextBox.Text = question.Text;
             PointsTextBox.Text = question.Points.ToString();
             AnswersGrid.ItemsSource = question.Answers;
+            try
+            {
+                FillImage(System.IO.Path.Combine(new string[] { Directory.GetCurrentDirectory(), "Images", question.ImageName }));
+            }
+            catch(Exception ex) { }
         }
         private void LoadImageBtn_Click(object sender, RoutedEventArgs e)
         {
-            
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;";
+            if (fileDialog.ShowDialog().Value)
+            {
+                FillImage(fileDialog.FileName);
+                question.ImageName = System.IO.Path.GetFileName(fileDialog.FileName);
+                this.ImagePath = fileDialog.FileName;
+            }
         }
 
         private void AddAnswerBtn_Click(object sender, RoutedEventArgs e)
@@ -79,6 +101,8 @@ namespace TestsDesigner
         {
             question.Text = TextQstnTextBox.Text;
             question.Points = Convert.ToInt32(PointsTextBox.Text);
+            if(question.ImageName != null)
+                File.Copy(this.ImagePath, Directory.GetCurrentDirectory() + @"\Images\" + question.ImageName, true);
 
             DialogResult = true;
             this.Close();
@@ -88,6 +112,12 @@ namespace TestsDesigner
         {
             DialogResult = false;
             this.Close();
+        }
+
+        private void ClearImageBtn_Click(object sender, RoutedEventArgs e)
+        {
+            QstnImage.Source = null;
+            question.ImageName = null;
         }
     }
 }

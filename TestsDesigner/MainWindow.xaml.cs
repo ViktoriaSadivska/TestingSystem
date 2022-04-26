@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,12 @@ namespace TestsDesigner
         public MainWindow()
         {
             InitializeComponent();
+
             currentTest = new Test();
+
+            string currentPath = Directory.GetCurrentDirectory();
+            if (!Directory.Exists(System.IO.Path.Combine(currentPath, "Images")))
+                Directory.CreateDirectory(System.IO.Path.Combine(currentPath, "Images"));
         }
         private int CountPoints()
         {
