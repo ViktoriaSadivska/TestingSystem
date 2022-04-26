@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestsDesigner"
         mc:Ignorable="d"
-        Title="Test Designer" Height="450" Width="800">
+        Title="Test Designer" Height="462" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -15,11 +15,10 @@
         <Menu Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Left" Background="CornflowerBlue">
             <MenuItem Header="File" FontWeight="Bold" Width="40" Height="25" BorderThickness="5">
                 <MenuItem Header="Create new test" Background="White" Name="NewTestBtn" Click="NewTestBtn_Click"/>
-                <MenuItem Header="Open test" Background="White" Name="OpenTestBtn"/>
-                <MenuItem Header="Save test" Background="White" Name="SaveTestBtn"/>
-                <MenuItem Header="Close test" Background="White" Name="CloseTestBtn"/>
+                <MenuItem Header="Open test" Background="White" Name="OpenTestBtn" Click="OpenTestBtn_Click"/>
+                <MenuItem Header="Save test" Background="White" Name="SaveTestBtn" Click="SaveTestBtn_Click"/>
                 <Separator/>
-                <MenuItem Header="Exit" Name="ExitBtn"/>
+                <MenuItem Header="Exit" Name="ExitBtn" Click="ExitBtn_Click"/>
             </MenuItem>
         </Menu>
 
@@ -93,7 +92,7 @@
 
                     <StackPanel Grid.Column="0" Orientation="Vertical">
                         <Label Content="Image for the question:"/>
-                        <InkCanvas Background="White" Margin="4" Height="160" Width="160" Name="TestImage"/>
+                        <Image Margin="4" Height="160" Width="160" Name="TestImage"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Vertical">

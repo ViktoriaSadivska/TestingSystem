@@ -12,6 +12,10 @@ namespace TestLib
         public List<Question> Questions { get; set; }
         public Test()
         {
+            Author = "";
+            Title = "";
+            Description = "";
+            PassingPercent = 0;
             Questions = new List<Question>();
         }
     }
