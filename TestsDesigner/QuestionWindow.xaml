@@ -18,7 +18,7 @@
                 <Label Content="Text of question:"/>
                 <Label Content="" Name="TextQuestionErrorLabel" Foreground="Red"/>
             </StackPanel>
-            <TextBox Name="TextQstnTextBox" Height="50" TextChanged="TextQstnTextBox_TextChanged"/>
+            <TextBox Name="TextQstnTextBox" Height="50" TextChanged="TextQstnTextBox_TextChanged" TextWrapping="Wrap"/>
             <Label Content="Points:"/>
             <TextBox Name="PointsTextBox" Text="0"/>
             <Label Content="Image for question:"/>

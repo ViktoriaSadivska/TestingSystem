@@ -9,7 +9,7 @@
     <Grid Background="AliceBlue">
         <StackPanel Margin="5,5,5,0">
             <Label Content="Answer:"/>
-            <TextBox Name="AnswerTextBox" Height="70" Margin="3"/>
+            <TextBox Name="AnswerTextBox" Height="70" Margin="3" TextWrapping="Wrap"/>
             <CheckBox Content="answer is true" Margin="5" Name="IsTrueChckBoc"/>
             <StackPanel Orientation="Horizontal">
                 <Button Content="Save" Name="SaveBtn" Margin="5" Width="120" Background="LightSteelBlue" Click="SaveBtn_Click"/>

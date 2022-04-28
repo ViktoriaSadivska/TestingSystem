@@ -52,7 +52,7 @@
                     <TextBox Grid.Row="1" Grid.Column="1" Height="25" VerticalAlignment="Center" Name="TitleTextBox"/>
 
                     <Label Grid.Row="2" Grid.Column="0" Content="Description:" VerticalAlignment="Top"/>
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="170" VerticalAlignment="Top"  Name="DescTextBox" VerticalScrollBarVisibility="Visible"/>
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="170" VerticalAlignment="Top"  Name="DescTextBox" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap"/>
                 </Grid>
 
                 <Grid Grid.Row="1" Background="AliceBlue" Margin="2">
