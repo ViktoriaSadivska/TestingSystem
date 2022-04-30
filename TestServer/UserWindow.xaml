@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TestServer"
         mc:Ignorable="d"
         Title="User" Height="370" Width="270">
-    <Grid Background="LightSteelBlue">
+    <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
@@ -30,8 +30,8 @@
         <TextBox Grid.Row="7" Name="PasswordNameTextBox" Margin="5"/>
         <CheckBox Grid.Row="8" Content="Is admin" Name="IsAdminChckBox" Margin="5"/>
         <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Content="Save" Name="SaveButton" Margin="5" Background="AliceBlue" Width="120" Click="SaveButton_Click"/>
-            <Button Content="Cancel" Name="CancelButton" Margin="5" Background="AliceBlue" Width="120" Click="CancelButton_Click"/>
+            <Button Content="Save" Name="SaveButton" Margin="5" Background="CornflowerBlue" Width="120" Click="SaveButton_Click"/>
+            <Button Content="Cancel" Name="CancelButton" Margin="5" Background="CornflowerBlue" Width="120" Click="CancelButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>
