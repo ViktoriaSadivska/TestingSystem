@@ -15,12 +15,12 @@
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="5*"/>
                     </Grid.ColumnDefinitions>
-                    <TreeView Grid.Column="0" Margin="5">
+                    <TreeView Grid.Column="0" Margin="5" Name="GroupsTreeView">
                         <TreeView.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="Add group"/>
-                                <MenuItem Header="Edit group"/>
-                                <MenuItem Header="Delete group group"/>
+                                <MenuItem Header="Add group" Name="AddGroupButton" Click="AddGroupButton_Click"/>
+                                <MenuItem Header="Edit group" Name="EditGroupButton" Click="EditGroupButton_Click"/>
+                                <MenuItem Header="Delete group group" Name="DeleteGroupButton" Click="DeleteGroupButton_Click"/>
                             </ContextMenu>
                         </TreeView.ContextMenu>
                     </TreeView>
@@ -29,12 +29,17 @@
                             <RowDefinition Height="4*"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <DataGrid Grid.Row="0" Background="White" Margin="5">
-                            
+                        <DataGrid Grid.Row="0" Background="White" Margin="5" Name="UsersGrid" AutoGenerateColumns="False" VerticalScrollBarVisibility="Visible">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="*"/>
+                                <DataGridTextColumn Binding="{Binding FirstName}" Header="First name" Width="2*"/>
+                                <DataGridTextColumn Binding="{Binding LastName}" Header="Last Name" Width="2*"/>
+                                <DataGridTextColumn Binding="{Binding Login}" Header="Login" Width="2*"/>
+                            </DataGrid.Columns>
                         </DataGrid>
                         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="5">
-                            <Button Content="Add user" Background="AliceBlue" Width="120" Margin="20"/>
-                            <Button Content="Edit user" Background="AliceBlue" Width="120" Margin="20"/>
+                            <Button Content="Add user" Background="AliceBlue" Width="120" Margin="20" Name="AddUserButton" Click="AddUserButton_Click"/>
+                            <Button Content="Edit user" Background="AliceBlue" Width="120" Margin="20" Name="EditUserButton" Click="EditUserButton_Click"/>
                         </StackPanel>
                      </Grid>
                 </Grid>
@@ -47,8 +52,14 @@
                         <RowDefinition Height="8*"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Content="Tests on server:"/>
-                    <DataGrid Grid.Row="1" Background="White" Margin="5">
-                        
+                    <DataGrid Grid.Row="1" Background="White" Margin="5" AutoGenerateColumns="False" Name="TestsDataGrid">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Author}" Header="Author" Width="3*"/>
+                            <DataGridTextColumn Binding="{Binding Title}" Header="Title" Width="3*"/>
+                            <DataGridTextColumn Binding="{Binding Description}" Header="Description" Width="4*"/>
+                            <DataGridTextColumn Binding="{Binding PassingPercent}" Header="Passing percent" Width="2*"/>
+                        </DataGrid.Columns>
                     </DataGrid>
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions>
@@ -60,8 +71,8 @@
                             <RowDefinition Height="4*"/>
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Content="Load test" Margin="5" Width="120" Background="AliceBlue"/>
-                            <Button Content="Save test" Margin="5" Width="120" Background="AliceBlue"/>
+                            <Button Content="Load test" Margin="5" Width="120" Background="AliceBlue" Name="LoadTestButton" Click="LoadTestButton_Click"/>
+                            <Button Content="Save test" Margin="5" Width="120" Background="AliceBlue" Name="SaveTestButton" Click="SaveTestButton_Click"/>
                         </StackPanel>
                         <Grid Grid.Column="0" Grid.Row="1">
                             <Grid.ColumnDefinitions>
@@ -82,27 +93,27 @@
                             <Label Grid.Row="3" Grid.Column="0" Content="Count of quest.:"/>
                             <Label Grid.Row="4" Grid.Column="0" Content="Max points:"/>
                             <Label Grid.Row="5" Grid.Column="0" Content="Passing percent:"/>
-                            <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
-                            <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
-                            <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
-                            <TextBox Grid.Row="4" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
-                            <TextBox Grid.Row="5" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
+                            <TextBox Name="AuthorTextBox" Grid.Row="0" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
+                            <TextBox Name="TitleTextBox" Grid.Row="1" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
+                            <TextBox Name="DescTextBox" Grid.Row="2" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
+                            <TextBox Name="CountOfQstnTextBox" Grid.Row="3" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
+                            <TextBox Name="MaxPointTextBox" Grid.Row="4" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
+                            <TextBox Name="PassPercTextBox" Grid.Row="5" Grid.Column="1" IsReadOnly="True" Margin="2" Background="LightSteelBlue"/>
                         </Grid>
                         <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Label Content="Users"  Margin="5" Width="250"/>
                             <Label Content="Groups"  Margin="5" Width="100"/>
-                            <Button Content="Assign" Background="AliceBlue" Margin="5" Width="120"/>
+                            <Button Content="Assign" Background="AliceBlue" Margin="5" Width="120" Name="AssignTestButton" Click="AssignTestButton_Click"/>
                         </StackPanel>
                         <Grid Grid.Row="1" Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:CheckListBox Grid.Column="0" Margin="5">
+                            <xctk:CheckListBox Grid.Column="0" Margin="5" Name="UsersChckListBox">
                                 
                             </xctk:CheckListBox>
-                            <xctk:CheckListBox Grid.Column="1" Margin="5">
+                            <xctk:CheckListBox Grid.Column="1" Margin="5" Name="GroupsChckListBox">
 
                             </xctk:CheckListBox>
                         </Grid>
@@ -116,7 +127,14 @@
                         <RowDefinition Height="10*"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Margin="5" Content="Results of the tests"/>
-                    <DataGrid Grid.Row="1" Margin="5" Background="White"></DataGrid>
+                    <DataGrid Grid.Row="1" Margin="5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding }" Header="Test" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding }" Header="User" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding }" Header="Points" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding }" Header="Is passed" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
             <TabItem Header="Server" FontWeight="Bold">
@@ -126,7 +144,7 @@
                         <RowDefinition Height="10*"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Margin="5" Content="Clients connected to the server"/>
-                    <ListView Grid.Row="1" Margin="5" Width="300" HorizontalAlignment="Left"/>
+                    <ListView Grid.Row="1" Margin="5" Width="300" HorizontalAlignment="Left" Name="ClientsListView"/>
                 </Grid>
             </TabItem>
         </TabControl>

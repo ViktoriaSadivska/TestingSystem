@@ -26,5 +26,50 @@ namespace TestServer
             InitializeComponent();
            
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AddGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void EditGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AddUserButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void EditUserButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void LoadTestButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void SaveTestButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AssignTestButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
