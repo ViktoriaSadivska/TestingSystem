@@ -7,7 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TestLib\TestLib.csproj" />
+    <ProjectReference Include="..\UsersLib\DBLib.csproj" />
   </ItemGroup>
 
 </Project>
