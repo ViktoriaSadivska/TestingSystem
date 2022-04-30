@@ -110,10 +110,24 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Results" FontWeight="Bold">
-                
+                <Grid Background="LightSteelBlue">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="10*"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Margin="5" Content="Results of the tests"/>
+                    <DataGrid Grid.Row="1" Margin="5" Background="White"></DataGrid>
+                </Grid>
             </TabItem>
             <TabItem Header="Server" FontWeight="Bold">
-                
+                <Grid Background="LightSteelBlue">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="10*"/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Margin="5" Content="Clients connected to the server"/>
+                    <ListView Grid.Row="1" Margin="5" Width="300" HorizontalAlignment="Left"/>
+                </Grid>
             </TabItem>
         </TabControl>
     </StackPanel>
