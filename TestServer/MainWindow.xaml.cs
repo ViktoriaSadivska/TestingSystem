@@ -71,7 +71,26 @@ namespace TestServer
 
         private void EditUserButton_Click(object sender, RoutedEventArgs e)
         {
+            if (UsersGrid.SelectedIndex >= 0)
+            {
+                UserWindow window = new UserWindow(UsersGrid.SelectedItem as User);
+                if (window.ShowDialog().Value)
+                {
+                    using (MyDBContext cnt = new MyDBContext())
+                    {
+                        User currentUser = cnt.Users.Find(window.user.Id);
+                        currentUser.FirstName = window.user.FirstName;
+                        currentUser.LastName = window.user.LastName;
+                        currentUser.Login = window.user.Login;
+                        currentUser.Password = window.user.Password;
+                        currentUser.IsAdmin = window.user.IsAdmin;
+                        cnt.SaveChanges();
 
+                        UsersGrid.ItemsSource = null;
+                        UsersGrid.ItemsSource = cnt.Users.ToList();
+                    }
+                }
+            }
         }
 
         private void LoadTestButton_Click(object sender, RoutedEventArgs e)
