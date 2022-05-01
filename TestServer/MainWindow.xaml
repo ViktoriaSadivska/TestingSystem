@@ -52,7 +52,7 @@
                         <RowDefinition Height="8*"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Content="Tests on server:"/>
-                    <DataGrid Grid.Row="1" Background="White" Margin="5" AutoGenerateColumns="False" Name="TestsDataGrid">
+                    <DataGrid Grid.Row="1" Background="White" Margin="5" AutoGenerateColumns="False" Name="TestsDataGrid" SelectionChanged="TestsDataGrid_SelectionChanged">
                         <DataGrid.Columns>
                             <DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="*"/>
                             <DataGridTextColumn Binding="{Binding Author}" Header="Author" Width="3*"/>
@@ -110,12 +110,19 @@
                                 <ColumnDefinition/>
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
-                            <xctk:CheckListBox Grid.Column="0" Margin="5" Name="UsersChckListBox">
-                                
-                            </xctk:CheckListBox>
-                            <xctk:CheckListBox Grid.Column="1" Margin="5" Name="GroupsChckListBox">
-
-                            </xctk:CheckListBox>
+                            <DataGrid Grid.Column="0" Margin="5" Name="UsersDataGrid" Background="White" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Binding="{ Binding IsSelected}"/>
+                                    <DataGridTextColumn Binding="{Binding FirstName}" Header="First name" Width="*"/>
+                                    <DataGridTextColumn Binding="{Binding LastName}" Header="Second name" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid Grid.Column="1" Margin="5" Name="GroupsDataGrid" Background="White" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridCheckBoxColumn Binding="{ Binding IsSelected}"/>
+                                    <DataGridTextColumn Binding="{Binding Name}" Header="Name"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -129,10 +136,10 @@
                     <Label Grid.Row="0" Margin="5" Content="Results of the tests"/>
                     <DataGrid Grid.Row="1" Margin="5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding }" Header="Test" Width="*"/>
-                            <DataGridTextColumn Binding="{Binding }" Header="User" Width="*"/>
-                            <DataGridTextColumn Binding="{Binding }" Header="Points" Width="*"/>
-                            <DataGridTextColumn Binding="{Binding }" Header="Is passed" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Test, Mode=OneWay}" Header="Test" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding User, Mode=OneWay}" Header="User" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding Points, Mode=OneWay}" Header="Points" Width="*"/>
+                            <DataGridTextColumn Binding="{Binding IsPassed, Mode=OneWay}" Header="Is passed" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
