@@ -20,7 +20,7 @@
                             <ContextMenu>
                                 <MenuItem Header="Add group" Name="AddGroupButton" Click="AddGroupButton_Click"/>
                                 <MenuItem Header="Edit group" Name="EditGroupButton" Click="EditGroupButton_Click"/>
-                                <MenuItem Header="Delete group group" Name="DeleteGroupButton" Click="DeleteGroupButton_Click"/>
+                                <MenuItem Header="Delete group" Name="DeleteGroupButton" Click="DeleteGroupButton_Click"/>
                             </ContextMenu>
                         </ListView.ContextMenu>
                     </ListView>

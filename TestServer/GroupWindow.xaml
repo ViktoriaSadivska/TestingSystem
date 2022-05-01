@@ -18,9 +18,13 @@
         <Label Content="Name:" Margin="5" Grid.Row="0"/>
         <TextBox Grid.Row="1" Name="GroupNameTextBox" Margin="5"/>
         <Label Content="Users in the group:" Margin="5" Grid.Row="2"/>
-        <xctk:CheckListBox Grid.Row="3" Margin="5" Name="UsersChckListBox">
-
-        </xctk:CheckListBox>
+        <DataGrid Grid.Row="3" Margin="5" Name="UsersDataGrid" Background="White" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridCheckBoxColumn Binding="{ Binding IsSelected}"/>
+                <DataGridTextColumn Binding="{Binding FirstName}" Header="First name" Width="*"/>
+                <DataGridTextColumn Binding="{Binding LastName}" Header="Second name" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Save" Name="SaveButton" Margin="5" Background="CornflowerBlue" Width="120" Click="SaveButton_Click"/>
             <Button Content="Cancel" Name="CancelButton" Margin="5" Background="CornflowerBlue" Width="120" Click="CancelButton_Click"/>

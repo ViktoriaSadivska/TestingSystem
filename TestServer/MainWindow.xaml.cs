@@ -40,17 +40,84 @@ namespace TestServer
 
         private void AddGroupButton_Click(object sender, RoutedEventArgs e)
         {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                GroupWindow window = new GroupWindow(cnt.Users.ToList());
+                if (window.ShowDialog().Value)
+                {
+                    var currentGroup = window.group;
+                    foreach (var i in window.users)
+                    {
+                        if (i.IsSelected == true)
+                        {
+                            currentGroup.Users.Add(cnt.Users.Where(x => x.Id == i.Id).First());
+                        }
+                    }
+                    cnt.Groups.Add(window.group);
+                    cnt.SaveChanges();
 
+                    GroupsListView.ItemsSource = null;
+                    GroupsListView.ItemsSource = cnt.Groups.ToList();
+                }
+            }
         }
 
         private void EditGroupButton_Click(object sender, RoutedEventArgs e)
         {
+            if(GroupsListView.SelectedIndex >= 0)
+            {
+                using (MyDBContext cnt = new MyDBContext())
+                {
+                    var selectedGroup = GroupsListView.SelectedItem as Group;
+                    List<User> selectedUsers = new List<User>();
+                    List<User> allUsers = cnt.Users.ToList();
+                    foreach (var i in allUsers)
+                    {
+                        foreach (var j in i.Groups)
+                        {
+                            if (j.Id == selectedGroup.Id)
+                            {
+                                selectedUsers.Add(i);
+                                break;
+                            }
+                        }
+                    }
 
+                    GroupWindow window = new GroupWindow(selectedGroup, allUsers, selectedUsers);
+                    if (window.ShowDialog().Value)
+                    {
+                        var currentGroup = cnt.Groups.Find(window.group.Id);
+                        currentGroup.Name = window.group.Name;
+                        currentGroup.Users.Clear();
+                        foreach (var i in window.users)
+                        {
+                            if(i.IsSelected == true)
+                            {
+                                currentGroup.Users.Add(cnt.Users.Where(x => x.Id == i.Id).First());
+                            }
+                        }
+                        cnt.SaveChanges();
+
+                        GroupsListView.ItemsSource = null;
+                        GroupsListView.ItemsSource = cnt.Groups.ToList();
+                    }
+                }
+            }
         }
 
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
         {
+            if(GroupsListView.SelectedIndex >= 0)
+            {
+                using (MyDBContext cnt = new MyDBContext())
+                {
+                    cnt.Groups.Remove(cnt.Groups.ToList()[GroupsListView.SelectedIndex]);
+                    cnt.SaveChanges();
 
+                    GroupsListView.ItemsSource = null;
+                    GroupsListView.ItemsSource = cnt.Groups.ToList();
+                }
+            }
         }
 
         private void AddUserButton_Click(object sender, RoutedEventArgs e)

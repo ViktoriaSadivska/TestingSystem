@@ -22,5 +22,9 @@ namespace DBLib
         {
             Groups = new List<Group>();
         }
+        public override string ToString()
+        {
+            return FirstName + " " + LastName;
+        }
     }
 }
