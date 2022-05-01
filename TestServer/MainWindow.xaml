@@ -15,15 +15,15 @@
                         <ColumnDefinition Width="2*"/>
                         <ColumnDefinition Width="5*"/>
                     </Grid.ColumnDefinitions>
-                    <TreeView Grid.Column="0" Margin="5" Name="GroupsTreeView">
-                        <TreeView.ContextMenu>
+                    <ListView Grid.Column="0" Margin="5" Name="GroupsListView">
+                        <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Add group" Name="AddGroupButton" Click="AddGroupButton_Click"/>
                                 <MenuItem Header="Edit group" Name="EditGroupButton" Click="EditGroupButton_Click"/>
                                 <MenuItem Header="Delete group group" Name="DeleteGroupButton" Click="DeleteGroupButton_Click"/>
                             </ContextMenu>
-                        </TreeView.ContextMenu>
-                    </TreeView>
+                        </ListView.ContextMenu>
+                    </ListView>
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="4*"/>

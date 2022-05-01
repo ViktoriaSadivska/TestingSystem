@@ -16,6 +16,7 @@ namespace DBLib
         public string Login { get; set; }
         [Required]
         public string Password { get; set; }
+        public bool IsAdmin { get; set; }
         public virtual ICollection<Group> Groups { get; set; }
         public User()
         {

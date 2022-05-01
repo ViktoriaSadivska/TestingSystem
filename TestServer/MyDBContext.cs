@@ -9,7 +9,7 @@ namespace TestServer
     public class MyDBContext : DbContext
     {
         public MyDBContext() : base("conStr") { }
-        static MyDBContext()    
+        static MyDBContext()
         {
             Database.SetInitializer<MyDBContext>(new MyInitializeDB());
         }

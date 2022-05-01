@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DBLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,7 +25,12 @@ namespace TestServer
         public MainWindow()
         {
             InitializeComponent();
-           
+
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                UsersGrid.ItemsSource = cnt.Users.ToList();
+                GroupsListView.ItemsSource = cnt.Groups.ToList();
+            }
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -49,7 +55,18 @@ namespace TestServer
 
         private void AddUserButton_Click(object sender, RoutedEventArgs e)
         {
+            UserWindow window = new UserWindow();
+            if (window.ShowDialog().Value)
+            {
+                using (MyDBContext cnt = new MyDBContext())
+                {
+                    cnt.Users.Add(window.user);
+                    cnt.SaveChanges();
 
+                    UsersGrid.ItemsSource = null;
+                    UsersGrid.ItemsSource = cnt.Users.ToList();
+                }
+            }
         }
 
         private void EditUserButton_Click(object sender, RoutedEventArgs e)
