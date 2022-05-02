@@ -39,7 +39,54 @@ namespace TestServer
                 GroupsListView.ItemsSource = cnt.Groups.ToList();
                 TestsDataGrid.ItemsSource = cnt.Tests.ToList();
 
+                foreach (var test in cnt.AssignedTests.Where(x => x.IsTaked == true))
+                {
+                    ResultsDataGrid.Items.Add(new
+                    {
+                        Test = test.Test.Title,
+                        User = test.User.FirstName + " " + test.User.LastName,
+                        Points = CountRightPoints(test),
+                        IsPassed = IsTestPassed(test)
+                    });
+                }
             }
+        }
+
+        private bool IsTestPassed(AssignedTest test)
+        {
+            double p = 0;
+            double max = 0;
+            int n;
+
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                foreach (var answer in cnt.UserAnswers.Where(x => x.idAssigned == test.Id))
+                {
+                    n = cnt.Answers.Where(x => x.idQuestion == answer.Answer.idQuestion && x.IsTrue).ToList().Count;
+                    p += answer.Answer.Question.Points / n;
+                }
+
+                max = cnt.Questions.Where(x => x.idTest == test.idTest).Sum(x => x.Points);
+                return p >= max / 100 * test.Test.PassingPercent;
+            }
+
+        }
+
+        private double CountRightPoints(AssignedTest test)
+        {
+            double p = 0;
+            int n;
+
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                foreach (var answer in cnt.UserAnswers.Where(x => x.idAssigned == test.Id))
+                {
+                    n = cnt.Answers.Where(x => x.idQuestion == answer.Answer.idQuestion && x.IsTrue).ToList().Count;
+                    p += answer.Answer.Question.Points / n;
+                }
+            }
+
+            return p;
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
