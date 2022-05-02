@@ -39,7 +39,6 @@ namespace TestServer
                 GroupsListView.ItemsSource = cnt.Groups.ToList();
                 TestsDataGrid.ItemsSource = cnt.Tests.ToList();
 
-                
             }
         }
 

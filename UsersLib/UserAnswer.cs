@@ -13,13 +13,11 @@ namespace DBLib
         public int? idUser { get; set; }
         [ForeignKey("idUser")]
         public virtual User User { get; set; }
-
-        public int? idQuestion { get; set; }
-        [ForeignKey("idQuestion")]
-        public virtual Question Question { get; set; }
-
         public int? idAnswer { get; set; }
         [ForeignKey("idAnswer")]
         public virtual Answer Answer { get; set; }
+        public int? idAssigned { get; set; }
+        [ForeignKey("idAssigned")]
+        public virtual AssignedTest AssignedTest { get; set; }
     }
 }
