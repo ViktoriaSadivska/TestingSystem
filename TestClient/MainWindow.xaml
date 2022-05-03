@@ -15,7 +15,7 @@
             <RowDefinition Height="0.5*"/>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Content="Assigned tests:" Margin="8" FontWeight="Bold"/>
-        <DataGrid Grid.Row="1" Background="White" Margin="5" AutoGenerateColumns="False" Name="TestsDataGrid" SelectionChanged="TestsDataGrid_SelectionChanged">
+        <DataGrid Grid.Row="1" Background="White" Margin="5" AutoGenerateColumns="False" Name="TestsDataGrid">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="*"/>
                 <DataGridTextColumn Binding="{Binding Author}" Header="Author" Width="3*"/>
@@ -31,10 +31,11 @@
         </StackPanel>
         <DataGrid Grid.Row="3" Margin="5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid">
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding TestId, Mode=OneWay}" Header="Test ID" Width="*"/>
-                <DataGridTextColumn Binding="{Binding Test, Mode=OneWay}" Header="Test" Width="2*"/>
-                <DataGridTextColumn Binding="{Binding Points, Mode=OneWay}" Header="Points" Width="*"/>
-                <DataGridTextColumn Binding="{Binding IsPassed, Mode=OneWay}" Header="Is passed" Width="2*"/>
+                <DataGridTextColumn Binding="{Binding ID, Mode=OneWay}" Header="ID" Width="*"/>
+                <DataGridTextColumn Binding="{Binding Author}" Header="Author" Width="3*"/>
+                <DataGridTextColumn Binding="{Binding Title, Mode=OneWay}" Header="Title" Width="3*"/>
+                <DataGridTextColumn Binding="{Binding Points, Mode=OneWay}" Header="Points" Width="4*"/>
+                <DataGridTextColumn Binding="{Binding IsPassed, Mode=OneWay}" Header="Is passed" Width="3*"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
