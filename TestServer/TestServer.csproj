@@ -9,9 +9,11 @@
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.4.4" />
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MethodLib\MethodLib.csproj" />
     <ProjectReference Include="..\TestLib\TestLib.csproj" />
     <ProjectReference Include="..\UsersLib\DBLib.csproj" />
   </ItemGroup>

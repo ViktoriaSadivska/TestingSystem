@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestServer"
         mc:Ignorable="d"
-        Title="Login" Height="200" Width="300">
+        Title="Login" Height="200" Width="300" Closing="Window_Closing">
     <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -15,7 +15,10 @@
             <RowDefinition/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Label Content="Login:" Grid.Row="0"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Label Content="Login:"/>
+            <Label Name="Error_label" Foreground="Red"/>
+        </StackPanel>
         <Label Content="Password:" Grid.Row="2"/>
         <TextBox Grid.Row="1" Margin="5" Name="LoginTextBox"/>
         <PasswordBox Grid.Row="3" Margin="5" Name="PasswordTextBox"/>

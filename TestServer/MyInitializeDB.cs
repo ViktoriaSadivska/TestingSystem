@@ -1,5 +1,8 @@
 ﻿using DBLib;
+using MethodLib;
+using System;
 using System.Data.Entity;
+using System.Security.Cryptography;
 
 namespace TestServer
 {
@@ -7,7 +10,7 @@ namespace TestServer
     {
         protected override void Seed(MyDBContext context)
         {
-            User user = new User { FirstName = "admin", LastName = "admin", Login = "admin", Password = "admin" };
+            User user = new User { FirstName = "admin", LastName = "admin", Login = "admin", Password = HelpMethods.Hash("admin")};
             Group group = new Group { Name = "admins" };
             group.Users.Add(user);
             context.Users.Add(user);

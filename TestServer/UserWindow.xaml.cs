@@ -1,4 +1,5 @@
 ﻿using DBLib;
+using MethodLib;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -33,7 +34,6 @@ namespace TestServer
             FirstNameTextBox.Text = user.FirstName;
             LastNameTextBox.Text = user.LastName;
             LoginTextBox.Text = user.Login;
-            PasswordTextBox.Text = user.Password;
             IsAdminChckBox.IsChecked = user.IsAdmin;
         }
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -41,8 +41,15 @@ namespace TestServer
             user.FirstName = FirstNameTextBox.Text;
             user.LastName = LastNameTextBox.Text;
             user.Login = LoginTextBox.Text;
-            user.Password = PasswordTextBox.Text;
             user.IsAdmin = IsAdminChckBox.IsChecked.Value;
+            if (PasswordTextBox.Password != "")
+            {
+                user.Password = HelpMethods.Hash(PasswordTextBox.Password);
+            }
+            else
+            {
+                user.Password = "";
+            }
 
             DialogResult = true;
             this.Close();

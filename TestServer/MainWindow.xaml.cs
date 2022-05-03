@@ -205,7 +205,8 @@ namespace TestServer
                         currentUser.FirstName = window.user.FirstName;
                         currentUser.LastName = window.user.LastName;
                         currentUser.Login = window.user.Login;
-                        currentUser.Password = window.user.Password;
+                        if(window.user.Password != "")
+                            currentUser.Password = window.user.Password;
                         currentUser.IsAdmin = window.user.IsAdmin;
                         cnt.SaveChanges();
 

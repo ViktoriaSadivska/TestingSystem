@@ -26,7 +26,7 @@
         <TextBox Grid.Row="1" Name="FirstNameTextBox" Margin="5"/>
         <TextBox Grid.Row="3" Name="LastNameTextBox" Margin="5"/>
         <TextBox Grid.Row="5" Name="LoginTextBox" Margin="5"/>
-        <TextBox Grid.Row="7" Name="PasswordTextBox" Margin="5"/>
+        <PasswordBox Grid.Row="7" Name="PasswordTextBox" Margin="5"/>
         <CheckBox Grid.Row="8" Content="Is admin" Name="IsAdminChckBox" Margin="5"/>
         <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Center">
             <Button Content="Save" Name="SaveButton" Margin="5" Background="CornflowerBlue" Width="120" Click="SaveButton_Click"/>
