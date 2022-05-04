@@ -27,6 +27,7 @@ namespace TestClient
     public partial class MainWindow : Window
     {
         Test[] assignedTests { get; set; }
+        TestResult[] results { get; set; }
         List<TestResult> testResults { get; set; }
         TcpClient Client { get; set; }
         public MainWindow(TcpClient client)
@@ -94,6 +95,22 @@ namespace TestClient
 
                                 TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = null; });
                                 TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = assignedTests; });
+ 
+                            }
+                            if (serverMessage == "r")
+                            {
+                                data = new byte[length - 1];
+                                Array.Copy(bytes, 1, data, 0, length - 1);
+
+                                using (var ms = new MemoryStream(data))
+                                {
+                                    BinaryFormatter formatter = new BinaryFormatter();
+                                    results = (TestResult[])formatter.Deserialize(ms);
+                                }
+
+                                ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = null; });
+                                ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = results; });
+
                             }
                         }
                     }
@@ -103,7 +120,7 @@ namespace TestClient
         }
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-
+            InitializeData();
         }
 
         private void TakeTestButton_Click(object sender, RoutedEventArgs e)

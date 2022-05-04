@@ -31,6 +31,7 @@ namespace TestServer
     public partial class MainWindow : Window
     {
         TcpListener Listener { get; set; }
+        Dictionary<TcpClient, int> ClientId { get; set; } = new Dictionary<TcpClient, int>();
         public TestLib.Test currentTest { get; set; }
         public string TestPath { get; set; }
         public List<SelectUser> assignedUsers { get; set; }
@@ -40,6 +41,7 @@ namespace TestServer
             InitializeComponent();
             InitializeData();
             InitializeConnection();
+
         }
 
         private void InitializeConnection()
@@ -75,12 +77,17 @@ namespace TestServer
 
                             if (clientMessage.StartsWith("login|"))
                             {
-                                byte[] msg = CheckPassword(clientMessage);
+                                byte[] msg = CheckPassword(clientMessage, connectedTcpClient);
                                 stream.Write(msg, 0, msg.Length);
                             }
                             else if (clientMessage == "assigned tests")
                             {
-                                byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests()).ToArray();  
+                                byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests(connectedTcpClient)).ToArray();  
+                                stream.Write(msg, 0, msg.Length);
+                            }
+                           else if(clientMessage == "test results")
+                            {
+                                byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(connectedTcpClient)).ToArray();
                                 stream.Write(msg, 0, msg.Length);
                             }
                         }
@@ -89,19 +96,51 @@ namespace TestServer
             }
         }
 
-
-        private byte[] GetTests()
+        private byte[] GetResults(TcpClient client)
         {
             using (MyDBContext cnt = new MyDBContext())
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream();
-                formatter.Serialize(ms, cnt.Tests.ToArray());
+
+                int id = ClientId[client];
+                List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.idUser == id && x.IsTaked).ToList();
+                List<TestResult> results = new List<TestResult>();
+                foreach (var test in assignedTests)
+                {
+                    results.Add(new TestResult
+                    {
+                        Title = test.Test.Title,
+                        Author = test.Test.Author,
+                        Id = test.Test.Id,
+                        Points = CountRightPoints(test),
+                        IsPassed = IsTestPassed(test)
+                    });
+                }
+                formatter.Serialize(ms, results.ToArray());
+                return ms.ToArray();
+            }
+        }
+        private byte[] GetTests(TcpClient client)
+        {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream ms = new MemoryStream();
+
+                int id = ClientId[client];
+                List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.idUser == id && !x.IsTaked).ToList();
+                List<Test> tests = new List<Test>();
+                foreach (var test in assignedTests)
+                {
+                    tests.Add(cnt.Tests.Where(x => x.Id == test.idTest).FirstOrDefault());
+                }
+                formatter.Serialize(ms, tests.ToArray());
                 return ms.ToArray();
             }
         }
 
-        private byte[] CheckPassword(string data)
+        private byte[] CheckPassword(string data, TcpClient client)
         {
             string[] strs = data.Split('|');
             string login = strs[1];
@@ -114,6 +153,8 @@ namespace TestServer
                     if (cnt.Users.Where(x => x.Login == login).FirstOrDefault() == null)
                         throw new Exception();
                     HelpMethods.CheckHash(cnt.Users.Where(x => x.Login == login).FirstOrDefault().Password, password);
+
+                    ClientId.Add(client, cnt.Users.Where(x => x.Login == login).FirstOrDefault().Id);
                     return Encoding.ASCII.GetBytes("true");
                 }
                 catch (Exception ex)
