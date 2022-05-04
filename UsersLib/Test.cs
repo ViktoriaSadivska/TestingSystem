@@ -6,6 +6,7 @@ using System.Text;
 
 namespace DBLib
 {
+    [Serializable]
     public class Test
     {
         [Key]

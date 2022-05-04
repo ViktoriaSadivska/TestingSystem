@@ -7,15 +7,19 @@
         mc:Ignorable="d"
         Title="Test Client" Height="450" Width="600">
     <Grid Background="LightSteelBlue">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="32*"/>
+            <ColumnDefinition Width="215*"/>
+            <ColumnDefinition Width="353*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="4*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="4*"/>
-            <RowDefinition Height="0.5*"/>
         </Grid.RowDefinitions>
-        <Label Grid.Row="0" Content="Assigned tests:" Margin="8" FontWeight="Bold"/>
-        <DataGrid Grid.Row="1" Background="White" Margin="5" AutoGenerateColumns="False" Name="TestsDataGrid">
+        <Label Grid.Row="0" Content="Assigned tests:" Margin="8,8,8,8" FontWeight="Bold" Grid.ColumnSpan="3"/>
+        <DataGrid Grid.Row="1" Background="White" Margin="5,5,5,5" AutoGenerateColumns="False" Name="TestsDataGrid" Grid.ColumnSpan="3">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding Id}" Header="ID" Width="*"/>
                 <DataGridTextColumn Binding="{Binding Author}" Header="Author" Width="3*"/>
@@ -24,12 +28,12 @@
                 <DataGridTextColumn Binding="{Binding PassingPercent}" Header="Passing percent" Width="3*"/>
             </DataGrid.Columns>
         </DataGrid>
-        <StackPanel Grid.Row="2" Orientation="Horizontal">
-            <Label Content="Taken tests:" FontWeight="Bold" Margin="9" Width="320"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Grid.ColumnSpan="3">
+            <Label Content="Taken tests:" FontWeight="Bold" Margin="9" Width="310"/>
             <Button Name ="RefreshButton" Background="CornflowerBlue" FontWeight="Bold" Click="RefreshButton_Click" Width="120" Margin="5" Content="Refresh" Height="25"/>
             <Button Name ="TakeTestButton" Background="CornflowerBlue" FontWeight="Bold" Click="TakeTestButton_Click" Width="120" Margin="5" Content="Take test" Height="25"/>
         </StackPanel>
-        <DataGrid Grid.Row="3" Margin="5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid">
+        <DataGrid Grid.Row="3" Margin="5,5,5,5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid" Grid.ColumnSpan="3">
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding ID, Mode=OneWay}" Header="ID" Width="*"/>
                 <DataGridTextColumn Binding="{Binding Author}" Header="Author" Width="3*"/>

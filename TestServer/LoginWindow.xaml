@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestServer"
         mc:Ignorable="d"
-        Title="Login" Height="200" Width="300" Closing="Window_Closing">
+        Title="Login" Height="220" Width="300" Closing="Window_Closing">
     <Grid Background="AliceBlue">
         <Grid.RowDefinitions>
             <RowDefinition/>

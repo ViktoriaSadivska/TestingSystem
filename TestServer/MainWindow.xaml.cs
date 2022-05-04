@@ -1,10 +1,15 @@
 ﻿using DBLib;
+using MethodLib;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,6 +30,7 @@ namespace TestServer
     /// </summary>
     public partial class MainWindow : Window
     {
+        TcpListener Listener { get; set; }
         public TestLib.Test currentTest { get; set; }
         public string TestPath { get; set; }
         public List<SelectUser> assignedUsers { get; set; }
@@ -32,7 +38,93 @@ namespace TestServer
         public MainWindow()
         {
             InitializeComponent();
+            InitializeData();
+            InitializeConnection();
+        }
 
+        private void InitializeConnection()
+        {
+            Listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 12400);
+            Listener.Start();
+
+            Thread thread = new Thread(new ThreadStart(Listen));
+            thread.IsBackground = true;
+            thread.Start();
+        }
+
+        private void Listen()
+        {
+            while (true)
+            {
+                using (var connectedTcpClient = Listener.AcceptTcpClient())
+                {
+                    Thread thread = new Thread(new ThreadStart(Listen));
+                    thread.IsBackground = true;
+                    thread.Start();
+
+                    using (NetworkStream stream = connectedTcpClient.GetStream())
+                    {
+                        int length;
+                        byte[] bytes = new byte[1024];
+
+                        while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
+                        {
+                            var incommingData = new byte[length];
+                            Array.Copy(bytes, 0, incommingData, 0, length);
+                            string clientMessage = Encoding.ASCII.GetString(incommingData);
+
+                            if (clientMessage.StartsWith("login|"))
+                            {
+                                byte[] msg = CheckPassword(clientMessage);
+                                stream.Write(msg, 0, msg.Length);
+                            }
+                            else if (clientMessage == "assigned tests")
+                            {
+                                byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests()).ToArray();  
+                                stream.Write(msg, 0, msg.Length);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private byte[] GetTests()
+        {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream ms = new MemoryStream();
+                formatter.Serialize(ms, cnt.Tests.ToArray());
+                return ms.ToArray();
+            }
+        }
+
+        private byte[] CheckPassword(string data)
+        {
+            string[] strs = data.Split('|');
+            string login = strs[1];
+            string password = strs[3];
+
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                try
+                {
+                    if (cnt.Users.Where(x => x.Login == login).FirstOrDefault() == null)
+                        throw new Exception();
+                    HelpMethods.CheckHash(cnt.Users.Where(x => x.Login == login).FirstOrDefault().Password, password);
+                    return Encoding.ASCII.GetBytes("true");
+                }
+                catch (Exception ex)
+                {
+                    return Encoding.ASCII.GetBytes("false");
+                }
+            }
+        }
+
+        private void InitializeData()
+        {
             using (MyDBContext cnt = new MyDBContext())
             {
                 UsersGrid.ItemsSource = cnt.Users.ToList();

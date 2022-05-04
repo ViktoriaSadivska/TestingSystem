@@ -5,24 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestClient"
         mc:Ignorable="d"
-        Title="Login" Height="200" Width="300" Closing="Window_Closing">
+        Title="Login" Height="220" Width="300" Closing="Window_Closing">
     <Grid Background="AliceBlue">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="41*"/>
+            <ColumnDefinition Width="20*"/>
+            <ColumnDefinition Width="239*"/>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition Height="0.4*"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Grid.ColumnSpan="3" Margin="0,0,0,30" Grid.RowSpan="2">
             <Label Content="Login:"/>
             <Label Name="Error_label" Foreground="Red"/>
         </StackPanel>
-        <Label Content="Password:" Grid.Row="2"/>
-        <TextBox Grid.Row="1" Margin="5" Name="LoginTextBox"/>
-        <PasswordBox Grid.Row="3" Margin="5" Name="PasswordTextBox"/>
-        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+        <Label Content="Password:" Grid.Row="1" Grid.ColumnSpan="3" Margin="0,30,0,0" Grid.RowSpan="2"/>
+        <TextBox Grid.Row="1" Margin="5,5,5,5" Name="LoginTextBox" Grid.ColumnSpan="3"/>
+        <PasswordBox Grid.Row="3" Margin="5,5,5,5" Name="PasswordTextBox" Grid.ColumnSpan="3"/>
+        <Label Foreground="Red" Grid.Row="4" Name="ErrorLabel" Grid.ColumnSpan="3"/>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="2" Margin="59,30,0,0" Grid.RowSpan="2">
             <Button Content="Login" Name="LoginButton" Click="LoginButton_Click"  Background="CornflowerBlue" Margin="5" Width="80"/>
             <Button Content="Exit" Name="ExitButton" Click="ExitButton_Click"  Background="CornflowerBlue" Margin="5" Width="80"/>
         </StackPanel>

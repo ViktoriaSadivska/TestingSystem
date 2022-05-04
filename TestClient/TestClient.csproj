@@ -6,4 +6,8 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\UsersLib\DBLib.csproj" />
+  </ItemGroup>
+
 </Project>
