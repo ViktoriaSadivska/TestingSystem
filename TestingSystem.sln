@@ -11,9 +11,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestServer", "TestServer\Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBLib", "UsersLib\DBLib.csproj", "{14945EE6-14DD-422C-BBD8-57C00B2A2DEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodLib", "MethodLib\MethodLib.csproj", "{D5C7A4E7-6F8D-44E1-8F5A-2BF9E3804056}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MethodLib", "MethodLib\MethodLib.csproj", "{D5C7A4E7-6F8D-44E1-8F5A-2BF9E3804056}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\TestClient.csproj", "{809DE456-D519-4505-9D44-5751E1F52E31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient", "TestClient\TestClient.csproj", "{809DE456-D519-4505-9D44-5751E1F52E31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLib", "DataLib\DataLib.csproj", "{285CD418-8D84-471C-B3F4-611DE58BB240}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{809DE456-D519-4505-9D44-5751E1F52E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{809DE456-D519-4505-9D44-5751E1F52E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{809DE456-D519-4505-9D44-5751E1F52E31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{285CD418-8D84-471C-B3F4-611DE58BB240}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{285CD418-8D84-471C-B3F4-611DE58BB240}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{285CD418-8D84-471C-B3F4-611DE58BB240}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{285CD418-8D84-471C-B3F4-611DE58BB240}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
