@@ -6,7 +6,7 @@
        
         xmlns:local="clr-namespace:TestServer" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="Test Server" Height="450" Width="800">
+        Title="Test Server" Height="450" Width="800" Closing="Window_Closing">
     <StackPanel>
         <TabControl Height="410">
             <TabItem Header="Groups and users" FontWeight="Bold">

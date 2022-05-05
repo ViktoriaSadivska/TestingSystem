@@ -1,18 +1,14 @@
-﻿using System;
+﻿using DataLib;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace TestClient
 {
@@ -41,38 +37,53 @@ namespace TestClient
 
         private void Listen(object obj)
         {
-            try
+            TcpClient client = obj as TcpClient;
+            while (true)
             {
-                TcpClient client = obj as TcpClient;
-                byte[] bytes = new byte[1024];
-                while (true)
-                {			
-                    using (NetworkStream stream = client.GetStream())
+                NetworkStream stream = client.GetStream();
+                int length;
+                byte[] buffer = new byte[2024];
+                List<DataPart> dataParts = new List<DataPart>();
+                DataPart dataPart;
+
+                while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
+                {
+                    using (var ms = new MemoryStream(buffer))
                     {
-                        int length;
+                        dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
+                    }
+                    if (dataParts.Count == 0)
+                        dataParts.Add(dataPart);
+                    else if (dataParts[0].Id == dataPart.Id)
+                        dataParts.Add(dataPart);
+                    if (dataParts.Count == dataPart.PartCount)
+                    {
+                        dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
+                        byte[] data = dataParts[0].Buffer;
+                        for (int i = 1; i < dataParts.Count; i++)
+                            data = data.Concat(dataParts[i].Buffer).ToArray();
 
-                        while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
-                        {
-                            var incommingData = new byte[length];
-                            Array.Copy(bytes, 0, incommingData, 0, length); 						
-                            string serverMessage = Encoding.ASCII.GetString(incommingData);
-
-                            if (serverMessage == "true")
-                            {
-                                Open = true;
-                                this.Dispatcher.Invoke(()=> { this.Close(); });
-                            }
-                            else if(serverMessage == "false")
-                            {
-                                ErrorLabel.Dispatcher.Invoke(() => { ErrorLabel.Content = "wrong login or password"; });
-                            }
-                        }
+                        ChooseAction(data);
+                        dataParts.Clear();
                     }
                 }
             }
-            catch (Exception Ex) { }
         }
-        
+
+        private void ChooseAction(byte[] data)
+        {
+            string serverMessage = Encoding.ASCII.GetString(data);
+
+            if (serverMessage == "true")
+            {
+                Open = true;
+                Dispatcher.Invoke(() => { Close(); }); 
+            }
+            else if (serverMessage == "false")
+            {
+                ErrorLabel.Dispatcher.Invoke(() => { ErrorLabel.Content = "wrong login or password"; });
+            }
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -85,27 +96,44 @@ namespace TestClient
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            if (Client != null)
+            try
             {
-                try
-                {		
-                    NetworkStream stream = Client.GetStream();
-                    if (stream.CanWrite)
-                    {
-                        byte[] bytes = Encoding.ASCII.GetBytes($"login|{LoginTextBox.Text}|password|{PasswordTextBox.Password}");
-                        stream.Write(bytes, 0, bytes.Length);
-                    }
-                }
-                catch (Exception Ex) { }
+                SendMsg($"login|{LoginTextBox.Text}|password|{PasswordTextBox.Password}");
             }
+            catch (Exception Ex) { }
+        }
 
+        private void SendMsg(string msg)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(msg);
+            byte[][] bufferArray = DataPart.BufferSplit(bytes, 1024);
+            string id = DataPart.GenerateId();
+            for (int i = 0; i < bufferArray.Length; ++i)
+            {
+                DataPart dataPart = new DataPart()
+                {
+                    Id = id,
+                    PartCount = bufferArray.Length,
+                    PartNum = i,
+                    Buffer = bufferArray[i]
+                };
+                byte[] dataPartArr;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    new BinaryFormatter().Serialize(ms, dataPart);
+                    dataPartArr = ms.ToArray();
+                }
+                NetworkStream stream = Client.GetStream();
+                stream.Write(dataPartArr, 0, dataPartArr.Length);
+            }
         }
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
             Open = false;
+            Client.GetStream().Close();
             Client.Close();
-            this.Close();
+            Close();
         }
     }
 }

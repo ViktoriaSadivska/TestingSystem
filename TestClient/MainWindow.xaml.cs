@@ -1,23 +1,14 @@
-﻿using DBLib;
+﻿using DataLib;
+using DBLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace TestClient
 {
@@ -43,75 +34,144 @@ namespace TestClient
 
         private void InitializeData()
         {
-            if (Client != null)
+            try
             {
-                NetworkStream stream = Client.GetStream();
-                if (stream.CanWrite)
+                if (Client != null)
                 {
-                    byte[] bytes = Encoding.ASCII.GetBytes("assigned tests");
-                    stream.Write(bytes, 0, bytes.Length);
-                }
-                if (stream.CanWrite)
-                {
-                    byte[] bytes = Encoding.ASCII.GetBytes("test results");
-                    stream.Write(bytes, 0, bytes.Length);
+                    NetworkStream stream = Client.GetStream();
+                    SendMsg("assigned tests");
+                    Thread.Sleep(2000);
+                    SendMsg("test results");
                 }
             }
+            catch (Exception ex)
+            {
+                Close();
+            }
         }
+
+        private void SendMsg(string msg)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(msg);
+            byte[][] bufferArray = DataPart.BufferSplit(bytes, 1024);
+            string id = DataPart.GenerateId();
+            for (int i = 0; i < bufferArray.Length; ++i)
+            {
+                DataPart dataPart = new DataPart()
+                {
+                    Id = id,
+                    PartCount = bufferArray.Length,
+                    PartNum = i,
+                    Buffer = bufferArray[i]
+                };
+                byte[] dataPartArr;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    new BinaryFormatter().Serialize(ms, dataPart);
+                    dataPartArr = ms.ToArray();
+                }
+                NetworkStream stream = Client.GetStream();
+                stream.Write(dataPartArr, 0, dataPartArr.Length);
+            }
+        }
+
         private void Listen(object obj)
         {
             TcpClient client = obj as TcpClient;
-            byte[] bytes = new byte[1024];
+            NetworkStream stream = client.GetStream();
+            int length;
+            byte[] buffer = new byte[2024];
+            List<DataPart> dataParts = new List<DataPart>();
+            DataPart dataPart;
+
             while (true)
             {
-                using (NetworkStream stream = client.GetStream())
+                while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
-                    int length;
-
-                    while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
+                    using (var ms = new MemoryStream(buffer))
                     {
-                        var data = new byte[1];
-                        Array.Copy(bytes, 0, data, 0, 1);
-                        string serverMessage = Encoding.ASCII.GetString(data);
+                        dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
+                    }
+                    if (dataParts.Count == 0)
+                        dataParts.Add(dataPart);
+                    else if (dataParts[0].Id == dataPart.Id)
+                        dataParts.Add(dataPart);
+                    if (dataParts.Count == dataPart.PartCount)
+                    {
+                        dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
+                        byte[] data = dataParts[0].Buffer;
+                        for (int i = 1; i < dataParts.Count; i++)
+                            data = data.Concat(dataParts[i].Buffer).ToArray();
 
-                        if (serverMessage == "a")
-                        {
-                            data = new byte[length - 1];
-                            Array.Copy(bytes, 1, data, 0, length - 1);
-
-                            using (var ms = new MemoryStream(data))
-                            {
-                                BinaryFormatter formatter = new BinaryFormatter();
-                                assignedTests = (Test[])formatter.Deserialize(ms);
-                            }
-                            TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = null; });
-                            TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = assignedTests; });
-                        }
-                        if (serverMessage == "r")
-                        {
-                            data = new byte[length - 1];
-                            Array.Copy(bytes, 1, data, 0, length - 1);
-
-                            using (var ms = new MemoryStream(data))
-                            {
-                                BinaryFormatter formatter = new BinaryFormatter();
-                                results = (TestResult[])formatter.Deserialize(ms);
-                            }
-                            ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = null; });
-                            ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = results; });
-                        }
+                        Thread thread = new Thread(ChooseAction);
+                        thread.IsBackground = true;
+                        thread.Start(data);
+                        dataParts.Clear();
                     }
                 }
             }
         }
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+
+        private void ChooseAction(object obj)
         {
-            InitializeData();
+            byte[] data = obj as byte[];
+            byte[] answer = new byte[1];
+            Array.Copy(data, 0, answer, 0, 1);
+            if (Encoding.ASCII.GetString(answer) == "a")
+            {
+                byte[] bytes = new byte[data.Length - 1];
+                Array.Copy(data, 1, bytes, 0, bytes.Length);
+
+                using (var ms = new MemoryStream(bytes))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    assignedTests = (Test[])formatter.Deserialize(ms);
+                }
+                TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = null; });
+                TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = assignedTests; });
+            }
+            else if (Encoding.ASCII.GetString(answer) == "r")
+            {
+                byte[] bytes = new byte[data.Length - 1];
+                Array.Copy(data, 1, bytes, 0, bytes.Length);
+
+                using (var ms = new MemoryStream(bytes))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    results = (TestResult[])formatter.Deserialize(ms);
+                }
+                ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = null; });
+                ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = results; });
+            }
+            else if(Encoding.ASCII.GetString(answer) == "t")
+            {
+                byte[] bytes = new byte[data.Length - 1];
+                Array.Copy(data, 1, bytes, 0, bytes.Length);
+
+                Answer[] answers;
+                using (var ms = new MemoryStream(bytes))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    answers = (Answer[])formatter.Deserialize(ms);
+                }
+
+                TestingWindow window = new TestingWindow(answers);
+                window.ShowDialog();
+            }
         }
 
         private void TakeTestButton_Click(object sender, RoutedEventArgs e)
         {
+            if (Client != null && TestsDataGrid.SelectedIndex >= 0)
+            {
+                SendMsg($"take test|{assignedTests[TestsDataGrid.SelectedIndex].Id}");
+            }
+        }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Client.GetStream().Close();
+            Client.Close();
         }
     }
 }

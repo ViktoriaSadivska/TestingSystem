@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestClient"
         mc:Ignorable="d"
-        Title="Test Client" Height="450" Width="600">
+        Title="Test Client" Height="450" Width="600" Closing="Window_Closing">
     <Grid Background="LightSteelBlue">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="32*"/>
@@ -29,8 +29,7 @@
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="2" Orientation="Horizontal" Grid.ColumnSpan="3">
-            <Label Content="Taken tests:" FontWeight="Bold" Margin="9" Width="310"/>
-            <Button Name ="RefreshButton" Background="CornflowerBlue" FontWeight="Bold" Click="RefreshButton_Click" Width="120" Margin="5" Content="Refresh" Height="25"/>
+            <Label Content="Taken tests:" FontWeight="Bold" Margin="9" Width="440"/>
             <Button Name ="TakeTestButton" Background="CornflowerBlue" FontWeight="Bold" Click="TakeTestButton_Click" Width="120" Margin="5" Content="Take test" Height="25"/>
         </StackPanel>
         <DataGrid Grid.Row="3" Margin="5,5,5,5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid" Grid.ColumnSpan="3">

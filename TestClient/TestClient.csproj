@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DataLib\DataLib.csproj" />
     <ProjectReference Include="..\UsersLib\DBLib.csproj" />
   </ItemGroup>
 

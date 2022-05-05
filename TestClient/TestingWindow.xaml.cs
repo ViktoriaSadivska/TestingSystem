@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DBLib;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows;
@@ -17,9 +18,15 @@ namespace TestClient
     /// </summary>
     public partial class TestingWindow : Window
     {
-        public TestingWindow()
+        public TestingWindow(Answer[] answers)
         {
             InitializeComponent();
+            InitializeData();
+        }
+
+        private void InitializeData()
+        {
+            throw new NotImplementedException();
         }
 
         private void PrevQstnButton_Click(object sender, RoutedEventArgs e)

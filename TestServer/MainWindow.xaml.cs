@@ -1,4 +1,5 @@
-﻿using DBLib;
+﻿using DataLib;
+using DBLib;
 using MethodLib;
 using Microsoft.Win32;
 using System;
@@ -10,18 +11,9 @@ using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml.Serialization;
-using Xceed.Wpf.Toolkit;
 
 namespace TestServer
 {
@@ -47,7 +39,11 @@ namespace TestServer
         {
             Listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 12400);
             Listener.Start();
+            StartNewListen();
+        }
 
+        private void StartNewListen()
+        {
             Thread thread = new Thread(new ThreadStart(Listen));
             thread.IsBackground = true;
             thread.Start();
@@ -59,43 +55,82 @@ namespace TestServer
             {
                 using (var connectedTcpClient = Listener.AcceptTcpClient())
                 {
-                    Thread thread = new Thread(new ThreadStart(Listen));
-                    thread.IsBackground = true;
-                    thread.Start();
-
-                    using (NetworkStream stream = connectedTcpClient.GetStream())
+                    StartNewListen();
+                    NetworkStream stream = connectedTcpClient.GetStream();
+                    int length;
+                    byte[] buffer = new byte[2024];
+                    List<DataPart> dataParts = new List<DataPart>();
+                    DataPart dataPart;
+                    try
                     {
-                        int length;
-                        byte[] bytes = new byte[1024];
-
-                        try
+                        while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
                         {
-                            while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
+                            using (var ms = new MemoryStream(buffer))
                             {
-                                var incommingData = new byte[length];
-                                Array.Copy(bytes, 0, incommingData, 0, length);
-                                string clientMessage = Encoding.ASCII.GetString(incommingData);
+                                dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
+                            }
+                            if (dataParts.Count == 0)
+                                dataParts.Add(dataPart);
+                            else if (dataParts[0].Id == dataPart.Id)
+                                dataParts.Add(dataPart);
+                            if (dataParts.Count == dataPart.PartCount)
+                            {
+                                dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
+                                byte[] data = dataParts[0].Buffer;
+                                for (int i = 1; i < dataParts.Count; i++)
+                                    data = data.Concat(dataParts[i].Buffer).ToArray();
 
-                                if (clientMessage.StartsWith("login|"))
-                                {
-                                    byte[] msg = CheckPassword(clientMessage, connectedTcpClient);
-                                    stream.Write(msg, 0, msg.Length);
-                                }
-                                else if (clientMessage == "assigned tests")
-                                {
-                                    byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests(connectedTcpClient)).ToArray();
-                                    stream.Write(msg, 0, msg.Length);
-                                }
-                                else if (clientMessage == "test results")
-                                {
-                                    byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(connectedTcpClient)).ToArray();
-                                    stream.Write(msg, 0, msg.Length);
-                                }
+                                ChooseAnswer(Encoding.ASCII.GetString(data), connectedTcpClient);
+                                dataParts.Clear();
                             }
                         }
-                        catch(Exception ex) { RemoveClient(connectedTcpClient); }
                     }
+                    catch (Exception ex) { RemoveClient(connectedTcpClient); }
                 }
+            }
+        }
+
+        private void ChooseAnswer(string clientMessage, TcpClient client)
+        {
+            if (clientMessage.StartsWith("login|"))
+            {
+                byte[] msg = CheckPassword(clientMessage, client);
+                AnswerClient(msg, client);
+            }
+            else if (clientMessage == "assigned tests")
+            {
+                byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests(client)).ToArray();
+                AnswerClient(msg, client);
+            }
+            else if (clientMessage == "test results")
+            {
+                byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(client)).ToArray();
+                AnswerClient(msg, client);
+            }
+        }
+
+
+        private void AnswerClient(byte[] msg, TcpClient client)
+        {
+            byte[][] bufferArray = DataPart.BufferSplit(msg,1024);
+            string id = DataPart.GenerateId();
+            for (int i = 0; i < bufferArray.Length; ++i)
+            {
+                DataPart dataPart = new DataPart()
+                {
+                    Id = id,
+                    PartCount = bufferArray.Length,
+                    PartNum = i,
+                    Buffer = bufferArray[i]
+                };
+                byte[] dataPartArr;
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    new BinaryFormatter().Serialize(ms, dataPart);
+                    dataPartArr = ms.ToArray();
+                }
+                NetworkStream stream = client.GetStream();
+                stream.Write(dataPartArr, 0, dataPartArr.Length);
             }
         }
 
@@ -510,6 +545,15 @@ namespace TestServer
                 GroupsDataGrid.ItemsSource = null;
                 UsersDataGrid.ItemsSource = assignedUsers;
                 GroupsDataGrid.ItemsSource = assignedGroups;
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Listener.Stop();
+            foreach (var item in ClientId)
+            {
+                item.Key.Close();
             }
         }
     }
