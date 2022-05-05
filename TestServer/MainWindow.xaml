@@ -151,7 +151,15 @@
                         <RowDefinition Height="10*"/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Margin="5" Content="Clients connected to the server"/>
-                    <ListView Grid.Row="1" Margin="5" Width="300" HorizontalAlignment="Left" Name="ClientsListView"/>
+                    <ListView Grid.Row="1" Margin="5" Width="300" HorizontalAlignment="Left" Name="ClientsListView">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <WrapPanel>
+                                    <TextBlock Text="{Binding Path=Value}"/>
+                                </WrapPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -62,7 +62,7 @@ namespace TestClient
                                 Open = true;
                                 this.Dispatcher.Invoke(()=> { this.Close(); });
                             }
-                            else
+                            else if(serverMessage == "false")
                             {
                                 ErrorLabel.Dispatcher.Invoke(() => { ErrorLabel.Content = "wrong login or password"; });
                             }

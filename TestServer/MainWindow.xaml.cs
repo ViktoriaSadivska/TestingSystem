@@ -31,7 +31,7 @@ namespace TestServer
     public partial class MainWindow : Window
     {
         TcpListener Listener { get; set; }
-        Dictionary<TcpClient, int> ClientId { get; set; } = new Dictionary<TcpClient, int>();
+        Dictionary<TcpClient, string> ClientId { get; set; } = new Dictionary<TcpClient, string>();
         public TestLib.Test currentTest { get; set; }
         public string TestPath { get; set; }
         public List<SelectUser> assignedUsers { get; set; }
@@ -41,7 +41,6 @@ namespace TestServer
             InitializeComponent();
             InitializeData();
             InitializeConnection();
-
         }
 
         private void InitializeConnection()
@@ -69,33 +68,55 @@ namespace TestServer
                         int length;
                         byte[] bytes = new byte[1024];
 
-                        while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
+                        try
                         {
-                            var incommingData = new byte[length];
-                            Array.Copy(bytes, 0, incommingData, 0, length);
-                            string clientMessage = Encoding.ASCII.GetString(incommingData);
+                            while ((length = stream.Read(bytes, 0, bytes.Length)) != 0)
+                            {
+                                var incommingData = new byte[length];
+                                Array.Copy(bytes, 0, incommingData, 0, length);
+                                string clientMessage = Encoding.ASCII.GetString(incommingData);
 
-                            if (clientMessage.StartsWith("login|"))
-                            {
-                                byte[] msg = CheckPassword(clientMessage, connectedTcpClient);
-                                stream.Write(msg, 0, msg.Length);
-                            }
-                            else if (clientMessage == "assigned tests")
-                            {
-                                byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests(connectedTcpClient)).ToArray();  
-                                stream.Write(msg, 0, msg.Length);
-                            }
-                           else if(clientMessage == "test results")
-                            {
-                                byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(connectedTcpClient)).ToArray();
-                                stream.Write(msg, 0, msg.Length);
+                                if (clientMessage.StartsWith("login|"))
+                                {
+                                    byte[] msg = CheckPassword(clientMessage, connectedTcpClient);
+                                    stream.Write(msg, 0, msg.Length);
+                                }
+                                else if (clientMessage == "assigned tests")
+                                {
+                                    byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests(connectedTcpClient)).ToArray();
+                                    stream.Write(msg, 0, msg.Length);
+                                }
+                                else if (clientMessage == "test results")
+                                {
+                                    byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(connectedTcpClient)).ToArray();
+                                    stream.Write(msg, 0, msg.Length);
+                                }
                             }
                         }
+                        catch(Exception ex) { RemoveClient(connectedTcpClient); }
                     }
                 }
             }
         }
 
+        private void RemoveClient(TcpClient client)
+        {
+            ClientId.Remove(client);
+            ClientsListView.Dispatcher.Invoke(() =>
+            {
+                ClientsListView.ItemsSource = null;
+                ClientsListView.ItemsSource = ClientId;
+            });
+        }
+        private void AddClient(TcpClient client, string login)
+        {
+            ClientId.Add(client, $"{login} | {client.Client.RemoteEndPoint}");
+            ClientsListView.Dispatcher.Invoke(() =>
+            {
+                ClientsListView.ItemsSource = null;
+                ClientsListView.ItemsSource = ClientId;
+            });
+        }
         private byte[] GetResults(TcpClient client)
         {
             using (MyDBContext cnt = new MyDBContext())
@@ -103,8 +124,8 @@ namespace TestServer
                 BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream();
 
-                int id = ClientId[client];
-                List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.idUser == id && x.IsTaked).ToList();
+                string login = ClientId[client].Split(" | ")[0];
+                List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.User.Login == login && x.IsTaked).ToList();
                 List<TestResult> results = new List<TestResult>();
                 foreach (var test in assignedTests)
                 {
@@ -128,8 +149,8 @@ namespace TestServer
                 BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream();
 
-                int id = ClientId[client];
-                List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.idUser == id && !x.IsTaked).ToList();
+                string login = ClientId[client].Split(" | ")[0];
+                List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.User.Login == login && !x.IsTaked).ToList();
                 List<Test> tests = new List<Test>();
                 foreach (var test in assignedTests)
                 {
@@ -154,7 +175,7 @@ namespace TestServer
                         throw new Exception();
                     HelpMethods.CheckHash(cnt.Users.Where(x => x.Login == login).FirstOrDefault().Password, password);
 
-                    ClientId.Add(client, cnt.Users.Where(x => x.Login == login).FirstOrDefault().Id);
+                    AddClient(client, login);
                     return Encoding.ASCII.GetBytes("true");
                 }
                 catch (Exception ex)
