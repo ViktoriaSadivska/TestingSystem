@@ -10,7 +10,8 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="237*"/>
             <ColumnDefinition Width="30*"/>
-            <ColumnDefinition Width="326*"/>
+            <ColumnDefinition Width="258*"/>
+            <ColumnDefinition Width="68*"/>
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" Orientation="Vertical" Margin="5,5,5,5">
@@ -29,7 +30,7 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="2">
+        <StackPanel Grid.Column="1" Margin="5,5,5,5" Grid.ColumnSpan="3">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Answers:"/>
                 <Label Content="" Name="TextAnswerErrorLabel" Foreground="Red"/>

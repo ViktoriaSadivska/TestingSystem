@@ -7,7 +7,7 @@ namespace TestLib
     {
         public string Text { get; set; }
         public int Points { get; set; }
-        public string ImageName { get; set; }
+        public byte[] Image { get; set; }
         public List<Answer> Answers { get; set; }
         public Question()
         {

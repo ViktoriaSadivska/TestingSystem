@@ -37,9 +37,6 @@ namespace TestsDesigner
         {
             string currentPath = Directory.GetCurrentDirectory();
 
-            if (!Directory.Exists(System.IO.Path.Combine(currentPath, "Images")))
-                Directory.CreateDirectory(System.IO.Path.Combine(currentPath, "Images"));
-
             if (!Directory.Exists(System.IO.Path.Combine(currentPath, "Tests")))
                 Directory.CreateDirectory(System.IO.Path.Combine(currentPath, "Tests"));
         }
@@ -136,7 +133,7 @@ namespace TestsDesigner
                     currentTest.Questions[QuestionGrid.SelectedIndex].Text = window.question.Text;
                     currentTest.Questions[QuestionGrid.SelectedIndex].Points = window.question.Points;
                     currentTest.Questions[QuestionGrid.SelectedIndex].Answers = window.question.Answers;
-                    currentTest.Questions[QuestionGrid.SelectedIndex].ImageName = window.question.ImageName;
+                    currentTest.Questions[QuestionGrid.SelectedIndex].Image = window.question.Image;
 
                     QuestionGrid.ItemsSource = null;
                     QuestionGrid.ItemsSource = currentTest.Questions;
@@ -170,9 +167,15 @@ namespace TestsDesigner
 
                 try
                 {
-                    Uri uri = new Uri(System.IO.Path.Combine(new string[] { Directory.GetCurrentDirectory(), "Images", currentTest.Questions[QuestionGrid.SelectedIndex].ImageName }));
-                    BitmapImage bitmap = new BitmapImage(uri);
-                    TestImage.Source = bitmap;
+                    using (MemoryStream ms = new MemoryStream(currentTest.Questions[QuestionGrid.SelectedIndex].Image))
+                    {
+                        BitmapImage btmp = new BitmapImage();
+                        btmp.BeginInit();
+                        btmp.CacheOption = BitmapCacheOption.OnLoad;
+                        btmp.StreamSource = ms;
+                        btmp.EndInit();
+                        TestImage.Source = btmp;
+                    }
                 }
                 catch (Exception ex) { }
             }
