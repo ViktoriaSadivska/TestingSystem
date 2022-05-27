@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 
 namespace TestServer
@@ -57,35 +58,40 @@ namespace TestServer
                 {
                     StartNewListen();
                     NetworkStream stream = connectedTcpClient.GetStream();
+                    stream.ReadTimeout = -1;
+                    stream.WriteTimeout = -1;
                     int length;
                     byte[] buffer = new byte[2024];
                     List<DataPart> dataParts = new List<DataPart>();
                     DataPart dataPart;
-                    try
-                    {
-                        while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
+                    //try
+                    //{
+                        while (true)
                         {
-                            using (var ms = new MemoryStream(buffer))
+                            while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
                             {
-                                dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
-                            }
-                            if (dataParts.Count == 0)
-                                dataParts.Add(dataPart);
-                            else if (dataParts[0].Id == dataPart.Id)
-                                dataParts.Add(dataPart);
-                            if (dataParts.Count == dataPart.PartCount)
-                            {
-                                dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
-                                byte[] data = dataParts[0].Buffer;
-                                for (int i = 1; i < dataParts.Count; i++)
-                                    data = data.Concat(dataParts[i].Buffer).ToArray();
+                                using (var ms = new MemoryStream(buffer))
+                                {
+                                    dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
+                                }
+                                if (dataParts.Count == 0)
+                                    dataParts.Add(dataPart);
+                                else if (dataParts[0].Id == dataPart.Id)
+                                    dataParts.Add(dataPart);
+                                if (dataParts.Count == dataPart.PartCount)
+                                {
+                                    dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
+                                    byte[] data = dataParts[0].Buffer;
+                                    for (int i = 1; i < dataParts.Count; i++)
+                                        data = data.Concat(dataParts[i].Buffer).ToArray();
 
                                 ChooseAnswer(Encoding.ASCII.GetString(data), connectedTcpClient);
-                                dataParts.Clear();
+                                    dataParts.Clear();
+                                }
                             }
                         }
-                    }
-                    catch (Exception ex) { RemoveClient(connectedTcpClient); }
+                    //}
+                    //catch (Exception ex) { RemoveClient(connectedTcpClient); }
                 }
             }
         }
@@ -107,12 +113,100 @@ namespace TestServer
                 byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(client)).ToArray();
                 AnswerClient(msg, client);
             }
+            else if (clientMessage.StartsWith("take test"))
+            {
+                byte[] msg;
+                foreach (var item in GetImages(client, clientMessage))
+                {
+                    msg = Encoding.ASCII.GetBytes("i").Concat(item).ToArray();
+                    AnswerClient(msg, client);
+                }
+                msg = Encoding.ASCII.GetBytes("t").Concat(GetTest(client, clientMessage)).ToArray();
+                AnswerClient(msg, client);
+                msg = Encoding.ASCII.GetBytes("q").Concat(GetQuestions(client, clientMessage)).ToArray();
+                AnswerClient(msg, client);
+                msg = Encoding.ASCII.GetBytes("n").Concat(GetAnswers(client, clientMessage)).ToArray();
+                AnswerClient(msg, client);
+            }
         }
 
+        private byte[] GetAnswers(TcpClient client, string clientMessage)
+        {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream ms = new MemoryStream();
+                cnt.Configuration.ProxyCreationEnabled = false;
+
+                string login = ClientId[client].Split(" | ")[0];
+                int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
+                List<Question> questions = cnt.Questions.Where(x => x.idTest == testId).ToList();
+                List<Answer> answers = new List<Answer>();
+                foreach (var qstn in questions)
+                {
+                    foreach (var answer in cnt.Answers.Where(x=>x.idQuestion == qstn.Id))
+                    {
+                        answers.Add(answer);
+                    }
+                }
+                formatter.Serialize(ms, answers.ToArray());
+                cnt.Configuration.ProxyCreationEnabled = true;
+                return ms.ToArray();
+            }
+        }
+        private List<byte[]> GetImages(TcpClient client, string clientMessage)
+        {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream ms = new MemoryStream();
+
+                string login = ClientId[client].Split(" | ")[0];
+                int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
+                List<Question> questions = cnt.Questions.Where(x => x.idTest == testId).ToList();
+                List<byte[]> images = new List<byte[]>();
+                foreach (var qstn in questions)
+                {
+                    if (qstn.ImageName != null && qstn.ImageName != "")
+                    {
+                        BitmapImage bitmap = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\Images\" + qstn.ImageName));
+                        images.Add(ImageToByte(bitmap));
+                    }
+                }
+                return images;
+            }
+        }
+        public static byte[] ImageToByte(BitmapImage bitmap)
+        {
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using (var stream = new MemoryStream())
+            {
+                encoder.Save(stream);
+                return stream.ToArray();
+            }
+        }
+        private byte[] GetQuestions(TcpClient client, string clientMessage)
+        {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream ms = new MemoryStream();
+
+                cnt.Configuration.ProxyCreationEnabled = false;
+                string login = ClientId[client].Split(" | ")[0];
+                int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
+                Question[] questions = cnt.Questions.Where(x => x.idTest == testId).ToArray();
+                formatter.Serialize(ms, questions);
+
+                cnt.Configuration.ProxyCreationEnabled = true;
+                return ms.ToArray();
+            }
+        }
 
         private void AnswerClient(byte[] msg, TcpClient client)
         {
-            byte[][] bufferArray = DataPart.BufferSplit(msg,1024);
+            byte[][] bufferArray = DataPart.BufferSplit(msg, 1024);
             string id = DataPart.GenerateId();
             for (int i = 0; i < bufferArray.Length; ++i)
             {
@@ -128,6 +222,10 @@ namespace TestServer
                 {
                     new BinaryFormatter().Serialize(ms, dataPart);
                     dataPartArr = ms.ToArray();
+                    using (FileStream file = new FileStream("file1.bin", FileMode.Create, System.IO.FileAccess.Write))
+                    {
+                        file.Write(dataPartArr, 0, dataPartArr.Length);
+                    }
                 }
                 NetworkStream stream = client.GetStream();
                 stream.Write(dataPartArr, 0, dataPartArr.Length);
@@ -152,6 +250,20 @@ namespace TestServer
                 ClientsListView.ItemsSource = ClientId;
             });
         }
+        private byte[] GetTest(TcpClient client, string clientMessage)
+        {
+            using (MyDBContext cnt = new MyDBContext())
+            {
+                BinaryFormatter formatter = new BinaryFormatter();
+                MemoryStream ms = new MemoryStream();
+
+                string login = ClientId[client].Split(" | ")[0];
+                int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
+                Test test = cnt.Tests.Where(x=> x.Id == testId).FirstOrDefault();
+                formatter.Serialize(ms, test);
+                return ms.ToArray();
+            }
+        }
         private byte[] GetResults(TcpClient client)
         {
             using (MyDBContext cnt = new MyDBContext())
@@ -160,6 +272,7 @@ namespace TestServer
                 MemoryStream ms = new MemoryStream();
 
                 string login = ClientId[client].Split(" | ")[0];
+
                 List<AssignedTest> assignedTests = cnt.AssignedTests.Where(x => x.User.Login == login && x.IsTaked).ToList();
                 List<TestResult> results = new List<TestResult>();
                 foreach (var test in assignedTests)
@@ -486,7 +599,7 @@ namespace TestServer
             if (!Directory.Exists(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Images")))
                 Directory.CreateDirectory(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Images"));
 
-            if (imageName != null || imageName != "")
+            if (imageName != null && imageName != "")
                 File.Copy(dir.FullName + @"\Images\" + imageName, Directory.GetCurrentDirectory() + @"\Images\" + imageName, true);
         }
 

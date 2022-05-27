@@ -70,6 +70,7 @@
                 <RowDefinition Height="3*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" Name="ButtonsStackPanel"/>
             <Label Grid.Row="1" Content="Question:"/>
             <Label Grid.Row="2" Name="QuestionLabel" HorizontalAlignment="Left" Margin="10"/>
             <Label Grid.Row="3" Content="Answers:"/>
@@ -80,15 +81,20 @@
                 </Grid.ColumnDefinitions>
                 <DataGrid Grid.Column="0" Background="White" Margin="5" AutoGenerateColumns="False" Name="AnswersDataGrid">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Binding="{Binding IsTrue}" Width="*"/>
-                        <DataGridCheckBoxColumn Binding="{Binding Answer}" Width="8*"/>
+                        <DataGridTextColumn Binding="{Binding Answer.Text}"  Width="8*"/>
+                        <DataGridCheckBoxColumn Binding="{Binding Reply, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="*">
+                            <DataGridCheckBoxColumn.CellStyle>
+                                <Style>
+                                    <EventSetter Event="CheckBox.Checked" Handler="OnChecked"/>
+                                    <EventSetter Event="CheckBox.Unchecked" Handler="OnChecked"/>
+                                </Style>
+                            </DataGridCheckBoxColumn.CellStyle>
+                        </DataGridCheckBoxColumn>
                     </DataGrid.Columns>
                 </DataGrid>
                 <Image Grid.Column="1" Height="140" Width="160" Name="TestImage"/>
             </Grid>
             <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Prev. question" Margin="10" Name="PrevQstnButton" Click="PrevQstnButton_Click" Width="100" Background="AliceBlue" Foreground="CornflowerBlue" FontWeight="Bold"/>
-                <Button Content="Next question" Margin="10" Name="NextQstnButton" Click="NextQstnButton_Click" Width="100" Background="AliceBlue" Foreground="CornflowerBlue" FontWeight="Bold"/>
                 <Label Width="170"/>
                 <Button Content="Finish" Margin="10" Name="FinishButton" Click="FinishButton_Click" Width="120" Background="AliceBlue" Foreground="CornflowerBlue" FontWeight="Bold"/>
             </StackPanel>

@@ -19,6 +19,7 @@ namespace TestClient
     {
         bool Open;
         TcpClient Client { get; set; }
+        CancellationTokenSource cts;
         public LoginWindow()
         {
             InitializeComponent();
@@ -29,18 +30,25 @@ namespace TestClient
         {
             Client = new TcpClient();
             Client.Connect(IPAddress.Parse("127.0.0.1"), 12400);
+            Client.GetStream().ReadTimeout = -1;
+            Client.GetStream().WriteTimeout = -1;
 
+            cts = new CancellationTokenSource();
             Thread thread = new Thread(Listen);
             thread.IsBackground = true;
-            thread.Start(Client);
+            thread.Start(cts.Token);
         }
 
         private void Listen(object obj)
         {
-            TcpClient client = obj as TcpClient;
+            CancellationToken token = (CancellationToken)obj;
             while (true)
             {
-                NetworkStream stream = client.GetStream();
+                if (token.IsCancellationRequested)
+                {
+                    break;
+                }
+                NetworkStream stream = Client.GetStream();
                 int length;
                 byte[] buffer = new byte[2024];
                 List<DataPart> dataParts = new List<DataPart>();
@@ -48,9 +56,14 @@ namespace TestClient
 
                 while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
+                    if (token.IsCancellationRequested)
+                    {
+                        break;
+                    }
                     using (var ms = new MemoryStream(buffer))
                     {
-                        dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
+                        ms.Position = 0;
+                        dataPart = (DataPart)new BinaryFormatter().Deserialize(ms);
                     }
                     if (dataParts.Count == 0)
                         dataParts.Add(dataPart);
@@ -61,8 +74,9 @@ namespace TestClient
                         dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
                         byte[] data = dataParts[0].Buffer;
                         for (int i = 1; i < dataParts.Count; i++)
+                        {
                             data = data.Concat(dataParts[i].Buffer).ToArray();
-
+                        }
                         ChooseAction(data);
                         dataParts.Clear();
                     }
@@ -74,7 +88,7 @@ namespace TestClient
         {
             string serverMessage = Encoding.ASCII.GetString(data);
 
-            if (serverMessage == "true")
+            if (serverMessage == "true") 
             {
                 Open = true;
                 Dispatcher.Invoke(() => { Close(); }); 
@@ -89,6 +103,7 @@ namespace TestClient
         {
             if (Open)
             {
+                cts.Cancel();
                 MainWindow window = new MainWindow(Client);
                 window.Show();
             }
@@ -100,7 +115,11 @@ namespace TestClient
             {
                 SendMsg($"login|{LoginTextBox.Text}|password|{PasswordTextBox.Password}");
             }
-            catch (Exception Ex) { }
+            catch (Exception Ex) 
+            {
+                Client.GetStream().Close();
+                Client.Close();
+            }
         }
 
         private void SendMsg(string msg)

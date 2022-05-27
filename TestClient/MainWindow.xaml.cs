@@ -2,6 +2,7 @@
 using DBLib;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -9,6 +10,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace TestClient
 {
@@ -20,6 +22,10 @@ namespace TestClient
         Test[] assignedTests { get; set; }
         TestResult[] results { get; set; }
         TcpClient Client { get; set; }
+        Test CurrentTest { get; set; }
+        Question[] CurrentQuestions { get; set; }
+        Answer[] CurrentAnswers { get; set; }
+        List<BitmapImage> CurrentImages { get; set; } = new List<BitmapImage>();
         public MainWindow(TcpClient client)
         {
             InitializeComponent();
@@ -90,6 +96,11 @@ namespace TestClient
                 {
                     using (var ms = new MemoryStream(buffer))
                     {
+                        using (FileStream file = new FileStream("file2.bin", FileMode.Create, System.IO.FileAccess.Write))
+                        {
+                            file.Write(buffer, 0, buffer.Length);
+                        }
+                        ms.Position = 0;
                         dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
                     }
                     if (dataParts.Count == 0)
@@ -143,20 +154,75 @@ namespace TestClient
                 ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = null; });
                 ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = results; });
             }
-            else if(Encoding.ASCII.GetString(answer) == "t")
+            else if (Encoding.ASCII.GetString(answer) == "t")
             {
                 byte[] bytes = new byte[data.Length - 1];
                 Array.Copy(data, 1, bytes, 0, bytes.Length);
 
-                Answer[] answers;
                 using (var ms = new MemoryStream(bytes))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
-                    answers = (Answer[])formatter.Deserialize(ms);
+                    CurrentTest = (Test)formatter.Deserialize(ms);
                 }
 
-                TestingWindow window = new TestingWindow(answers);
-                window.ShowDialog();
+                TakeTest();
+            }
+            else if (Encoding.ASCII.GetString(answer) == "q")
+            {
+                byte[] bytes = new byte[data.Length - 1];
+                Array.Copy(data, 1, bytes, 0, bytes.Length);
+
+                using (var ms = new MemoryStream(bytes))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    CurrentQuestions = (Question[])formatter.Deserialize(ms);
+                }
+
+                TakeTest();
+            }
+            else if (Encoding.ASCII.GetString(answer) == "n")
+            {
+                byte[] bytes = new byte[data.Length - 1];
+                Array.Copy(data, 1, bytes, 0, bytes.Length);
+
+                using (var ms = new MemoryStream(bytes))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+                    CurrentAnswers = (Answer[])formatter.Deserialize(ms);
+                }
+
+                TakeTest();
+            }
+            else if (Encoding.ASCII.GetString(answer) == "i")
+            {
+                byte[] bytes = new byte[data.Length - 1];
+                Array.Copy(data, 1, bytes, 0, bytes.Length);
+                CurrentImages.Add(ToImage(bytes));
+
+                TakeTest();
+            }
+        }
+        public BitmapImage ToImage(byte[] array)
+        {
+            using (var ms = new MemoryStream(array))
+            {
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad; 
+                image.StreamSource = ms;
+                image.EndInit();
+                return image;
+            }
+        }
+
+        private void TakeTest()
+        {
+            if(CurrentTest != null && CurrentAnswers != null && CurrentQuestions != null)
+            {
+                Dispatcher.Invoke(() => {
+                    TestingWindow window = new TestingWindow(CurrentTest, CurrentQuestions, CurrentAnswers, CurrentImages);
+                    window.ShowDialog();
+                });
             }
         }
 
