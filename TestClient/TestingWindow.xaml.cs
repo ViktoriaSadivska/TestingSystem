@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
@@ -22,16 +23,14 @@ namespace TestClient
     {
         Test Test { get; set; }
         List<Question> Questions { get; set; }
-        List<BitmapImage> Images { get; set; }
         Dictionary<int,ObservableCollection<UserAnswer>> QuestionAnswers { get; set; }
         List<Button> buttons { get; set; } = new List<Button>();
-        public TestingWindow(Test test, Question[] questions, Answer[] answers, List<BitmapImage> images)
+        public TestingWindow(Test test, Question[] questions, Answer[] answers)
         {
             InitializeComponent();
 
             Test = test;
             Questions = questions.ToList();
-            //Images = images.ToList();
             QuestionAnswers = new Dictionary<int, ObservableCollection<UserAnswer>>();
             foreach (var q in questions)
             {
@@ -67,20 +66,17 @@ namespace TestClient
         {
             int ind = buttons.IndexOf(sender as Button);
             QuestionLabel.Content = Questions[ind].Text;
-            //if (Questions[ind].ImageName != null && Questions[ind].ImageName != "") {
-            //    TestImage.Source = Images.First(x => System.IO.Path.GetFileName(x.UriSource.OriginalString) == Questions[ind].ImageName);
-            //}
+
+            using (MemoryStream ms = new MemoryStream(Questions[ind].Image))
+            {
+                BitmapImage btmp = new BitmapImage();
+                btmp.BeginInit();
+                btmp.CacheOption = BitmapCacheOption.OnLoad;
+                btmp.StreamSource = ms;
+                btmp.EndInit();
+                TestImage.Source = btmp;
+            }
             AnswersDataGrid.ItemsSource = QuestionAnswers[Questions[ind].Id];
-        }
-
-        private void PrevQstnButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void NextQstnButton_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void FinishButton_Click(object sender, RoutedEventArgs e)

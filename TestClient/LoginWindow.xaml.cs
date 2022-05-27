@@ -86,7 +86,7 @@ namespace TestClient
 
         private void ChooseAction(byte[] data)
         {
-            string serverMessage = Encoding.ASCII.GetString(data);
+            string serverMessage = Encoding.UTF8.GetString(data);
 
             if (serverMessage == "true") 
             {
@@ -124,7 +124,7 @@ namespace TestClient
 
         private void SendMsg(string msg)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(msg);
+            byte[] bytes = Encoding.UTF8.GetBytes(msg);
             byte[][] bufferArray = DataPart.BufferSplit(bytes, 1024);
             string id = DataPart.GenerateId();
             for (int i = 0; i < bufferArray.Length; ++i)

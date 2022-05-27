@@ -61,11 +61,11 @@ namespace TestServer
                     stream.ReadTimeout = -1;
                     stream.WriteTimeout = -1;
                     int length;
-                    byte[] buffer = new byte[2024];
+                    byte[] buffer = new byte[8000];
                     List<DataPart> dataParts = new List<DataPart>();
                     DataPart dataPart;
-                    //try
-                    //{
+                    try
+                    {
                         while (true)
                         {
                             while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
@@ -85,13 +85,13 @@ namespace TestServer
                                     for (int i = 1; i < dataParts.Count; i++)
                                         data = data.Concat(dataParts[i].Buffer).ToArray();
 
-                                ChooseAnswer(Encoding.ASCII.GetString(data), connectedTcpClient);
+                                ChooseAnswer(Encoding.UTF8.GetString(data), connectedTcpClient);
                                     dataParts.Clear();
                                 }
                             }
                         }
-                    //}
-                    //catch (Exception ex) { RemoveClient(connectedTcpClient); }
+                    }
+                    catch (Exception ex) { RemoveClient(connectedTcpClient); }
                 }
             }
         }
@@ -116,16 +116,11 @@ namespace TestServer
             else if (clientMessage.StartsWith("take test"))
             {
                 byte[] msg;
-                foreach (var item in GetImages(client, clientMessage))
-                {
-                    msg = Encoding.ASCII.GetBytes("i").Concat(item).ToArray();
-                    AnswerClient(msg, client);
-                }
-                msg = Encoding.ASCII.GetBytes("t").Concat(GetTest(client, clientMessage)).ToArray();
+                msg = Encoding.UTF8.GetBytes("t").Concat(GetTest(client, clientMessage)).ToArray();
                 AnswerClient(msg, client);
-                msg = Encoding.ASCII.GetBytes("q").Concat(GetQuestions(client, clientMessage)).ToArray();
+                msg = Encoding.UTF8.GetBytes("q").Concat(GetQuestions(client, clientMessage)).ToArray();
                 AnswerClient(msg, client);
-                msg = Encoding.ASCII.GetBytes("n").Concat(GetAnswers(client, clientMessage)).ToArray();
+                msg = Encoding.UTF8.GetBytes("n").Concat(GetAnswers(client, clientMessage)).ToArray();
                 AnswerClient(msg, client);
             }
         }
@@ -152,38 +147,6 @@ namespace TestServer
                 formatter.Serialize(ms, answers.ToArray());
                 cnt.Configuration.ProxyCreationEnabled = true;
                 return ms.ToArray();
-            }
-        }
-        private List<byte[]> GetImages(TcpClient client, string clientMessage)
-        {
-            using (MyDBContext cnt = new MyDBContext())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                MemoryStream ms = new MemoryStream();
-
-                string login = ClientId[client].Split(" | ")[0];
-                int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
-                List<Question> questions = cnt.Questions.Where(x => x.idTest == testId).ToList();
-                List<byte[]> images = new List<byte[]>();
-                foreach (var qstn in questions)
-                {
-                    if (qstn.ImageName != null && qstn.ImageName != "")
-                    {
-                        BitmapImage bitmap = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + @"\Images\" + qstn.ImageName));
-                        images.Add(ImageToByte(bitmap));
-                    }
-                }
-                return images;
-            }
-        }
-        public static byte[] ImageToByte(BitmapImage bitmap)
-        {
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmap));
-            using (var stream = new MemoryStream())
-            {
-                encoder.Save(stream);
-                return stream.ToArray();
             }
         }
         private byte[] GetQuestions(TcpClient client, string clientMessage)
@@ -222,10 +185,6 @@ namespace TestServer
                 {
                     new BinaryFormatter().Serialize(ms, dataPart);
                     dataPartArr = ms.ToArray();
-                    using (FileStream file = new FileStream("file1.bin", FileMode.Create, System.IO.FileAccess.Write))
-                    {
-                        file.Write(dataPartArr, 0, dataPartArr.Length);
-                    }
                 }
                 NetworkStream stream = client.GetStream();
                 stream.Write(dataPartArr, 0, dataPartArr.Length);
@@ -389,11 +348,6 @@ namespace TestServer
             }
 
             return p;
-        }
-
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void AddGroupButton_Click(object sender, RoutedEventArgs e)
@@ -564,8 +518,7 @@ namespace TestServer
 
                 foreach (var question in currentTest.Questions)
                 {
-                    q = new Question { Text = question.Text, Test = t, ImageName = question.ImageName, Points = question.Points };
-                    CopyImage(question.ImageName);
+                    q = new Question { Text = question.Text, Test = t, Image = question.Image, Points = question.Points };
                     cnt.Questions.Add(q);
 
                     foreach (var answer in question.Answers)
@@ -591,18 +544,6 @@ namespace TestServer
             MaxPointTextBox.Text = "";
             PassPercTextBox.Text = "";
         }
-
-        private void CopyImage(string imageName)
-        {
-            DirectoryInfo dir = new FileInfo(TestPath).Directory.Parent;
-
-            if (!Directory.Exists(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Images")))
-                Directory.CreateDirectory(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Images"));
-
-            if (imageName != null && imageName != "")
-                File.Copy(dir.FullName + @"\Images\" + imageName, Directory.GetCurrentDirectory() + @"\Images\" + imageName, true);
-        }
-
         private void AssignTestButton_Click(object sender, RoutedEventArgs e)
         {
             using (MyDBContext cnt = new MyDBContext())
@@ -666,6 +607,7 @@ namespace TestServer
             Listener.Stop();
             foreach (var item in ClientId)
             {
+                item.Key.GetStream().Close();
                 item.Key.Close();
             }
         }

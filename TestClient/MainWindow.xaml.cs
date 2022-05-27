@@ -25,7 +25,6 @@ namespace TestClient
         Test CurrentTest { get; set; }
         Question[] CurrentQuestions { get; set; }
         Answer[] CurrentAnswers { get; set; }
-        List<BitmapImage> CurrentImages { get; set; } = new List<BitmapImage>();
         public MainWindow(TcpClient client)
         {
             InitializeComponent();
@@ -58,7 +57,7 @@ namespace TestClient
 
         private void SendMsg(string msg)
         {
-            byte[] bytes = Encoding.ASCII.GetBytes(msg);
+            byte[] bytes = Encoding.UTF8.GetBytes(msg);
             byte[][] bufferArray = DataPart.BufferSplit(bytes, 1024);
             string id = DataPart.GenerateId();
             for (int i = 0; i < bufferArray.Length; ++i)
@@ -86,7 +85,7 @@ namespace TestClient
             TcpClient client = obj as TcpClient;
             NetworkStream stream = client.GetStream();
             int length;
-            byte[] buffer = new byte[2024];
+            byte[] buffer = new byte[8000];
             List<DataPart> dataParts = new List<DataPart>();
             DataPart dataPart;
 
@@ -96,10 +95,6 @@ namespace TestClient
                 {
                     using (var ms = new MemoryStream(buffer))
                     {
-                        using (FileStream file = new FileStream("file2.bin", FileMode.Create, System.IO.FileAccess.Write))
-                        {
-                            file.Write(buffer, 0, buffer.Length);
-                        }
                         ms.Position = 0;
                         dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
                     }
@@ -128,7 +123,7 @@ namespace TestClient
             byte[] data = obj as byte[];
             byte[] answer = new byte[1];
             Array.Copy(data, 0, answer, 0, 1);
-            if (Encoding.ASCII.GetString(answer) == "a")
+            if (Encoding.UTF8.GetString(answer) == "a")
             {
                 byte[] bytes = new byte[data.Length - 1];
                 Array.Copy(data, 1, bytes, 0, bytes.Length);
@@ -141,7 +136,7 @@ namespace TestClient
                 TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = null; });
                 TestsDataGrid.Dispatcher.Invoke(() => { TestsDataGrid.ItemsSource = assignedTests; });
             }
-            else if (Encoding.ASCII.GetString(answer) == "r")
+            else if (Encoding.UTF8.GetString(answer) == "r")
             {
                 byte[] bytes = new byte[data.Length - 1];
                 Array.Copy(data, 1, bytes, 0, bytes.Length);
@@ -154,7 +149,7 @@ namespace TestClient
                 ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = null; });
                 ResultsDataGrid.Dispatcher.Invoke(() => { ResultsDataGrid.ItemsSource = results; });
             }
-            else if (Encoding.ASCII.GetString(answer) == "t")
+            else if (Encoding.UTF8.GetString(answer) == "t")
             {
                 byte[] bytes = new byte[data.Length - 1];
                 Array.Copy(data, 1, bytes, 0, bytes.Length);
@@ -167,7 +162,7 @@ namespace TestClient
 
                 TakeTest();
             }
-            else if (Encoding.ASCII.GetString(answer) == "q")
+            else if (Encoding.UTF8.GetString(answer) == "q")
             {
                 byte[] bytes = new byte[data.Length - 1];
                 Array.Copy(data, 1, bytes, 0, bytes.Length);
@@ -180,7 +175,7 @@ namespace TestClient
 
                 TakeTest();
             }
-            else if (Encoding.ASCII.GetString(answer) == "n")
+            else if (Encoding.UTF8.GetString(answer) == "n")
             {
                 byte[] bytes = new byte[data.Length - 1];
                 Array.Copy(data, 1, bytes, 0, bytes.Length);
@@ -193,26 +188,6 @@ namespace TestClient
 
                 TakeTest();
             }
-            else if (Encoding.ASCII.GetString(answer) == "i")
-            {
-                byte[] bytes = new byte[data.Length - 1];
-                Array.Copy(data, 1, bytes, 0, bytes.Length);
-                CurrentImages.Add(ToImage(bytes));
-
-                TakeTest();
-            }
-        }
-        public BitmapImage ToImage(byte[] array)
-        {
-            using (var ms = new MemoryStream(array))
-            {
-                var image = new BitmapImage();
-                image.BeginInit();
-                image.CacheOption = BitmapCacheOption.OnLoad; 
-                image.StreamSource = ms;
-                image.EndInit();
-                return image;
-            }
         }
 
         private void TakeTest()
@@ -220,7 +195,7 @@ namespace TestClient
             if(CurrentTest != null && CurrentAnswers != null && CurrentQuestions != null)
             {
                 Dispatcher.Invoke(() => {
-                    TestingWindow window = new TestingWindow(CurrentTest, CurrentQuestions, CurrentAnswers, CurrentImages);
+                    TestingWindow window = new TestingWindow(CurrentTest, CurrentQuestions, CurrentAnswers);
                     window.ShowDialog();
                 });
             }
