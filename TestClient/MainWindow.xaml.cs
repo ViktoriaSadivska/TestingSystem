@@ -30,6 +30,7 @@ namespace TestClient
             InitializeComponent();
 
             Client = client;
+            Client.GetStream().ReadTimeout = -1;
             Thread thread = new Thread(Listen);
             thread.IsBackground = true;
             thread.Start(client);
@@ -39,26 +40,26 @@ namespace TestClient
 
         private void InitializeData()
         {
-            try
+            if (Client != null)
             {
-                if (Client != null)
-                {
-                    NetworkStream stream = Client.GetStream();
-                    SendMsg("assigned tests");
-                    Thread.Sleep(2000);
-                    SendMsg("test results");
-                }
-            }
-            catch (Exception ex)
-            {
-                Close();
+                NetworkStream stream = Client.GetStream();
+                SendMsg("assigned tests");
+                Thread.Sleep(2000);
+                SendMsg("test results");
             }
         }
+
+        //private void debug(string msg)
+        //{
+        //    TextWriter tw = new StreamWriter("client.txt", true);
+        //    tw.WriteLine(msg);
+        //    tw.Close();
+        //}
 
         private void SendMsg(string msg)
         {
             byte[] bytes = Encoding.UTF8.GetBytes(msg);
-            byte[][] bufferArray = DataPart.BufferSplit(bytes, 1024);
+            byte[][] bufferArray = DataPart.BufferSplit(bytes, 800);
             string id = DataPart.GenerateId();
             for (int i = 0; i < bufferArray.Length; ++i)
             {
@@ -85,17 +86,25 @@ namespace TestClient
             TcpClient client = obj as TcpClient;
             NetworkStream stream = client.GetStream();
             int length;
-            byte[] buffer = new byte[8000];
+            byte[] buffer = new byte[9000];
             List<DataPart> dataParts = new List<DataPart>();
             DataPart dataPart;
 
+            //debug("Main 1");
             while (true)
             {
+                //debug("Main 2");
                 while ((length = stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
+                    //debug("Main 3");
+                    //debug(length.ToString());
+
+                    //FileStream bf = new FileStream("client.dat", FileMode.Append);
+                    //bf.Write(buffer, 0, length);
+                    //bf.Close();
+
                     using (var ms = new MemoryStream(buffer))
                     {
-                        ms.Position = 0;
                         dataPart = new BinaryFormatter().Deserialize(ms) as DataPart;
                     }
                     if (dataParts.Count == 0)
@@ -107,12 +116,14 @@ namespace TestClient
                         dataParts = dataParts.OrderBy(d => d.PartNum).ToList();
                         byte[] data = dataParts[0].Buffer;
                         for (int i = 1; i < dataParts.Count; i++)
+                        {
                             data = data.Concat(dataParts[i].Buffer).ToArray();
+                        }
 
+                        dataParts.Clear();
                         Thread thread = new Thread(ChooseAction);
                         thread.IsBackground = true;
                         thread.Start(data);
-                        dataParts.Clear();
                     }
                 }
             }
@@ -123,6 +134,7 @@ namespace TestClient
             byte[] data = obj as byte[];
             byte[] answer = new byte[1];
             Array.Copy(data, 0, answer, 0, 1);
+
             if (Encoding.UTF8.GetString(answer) == "a")
             {
                 byte[] bytes = new byte[data.Length - 1];
@@ -159,8 +171,6 @@ namespace TestClient
                     BinaryFormatter formatter = new BinaryFormatter();
                     CurrentTest = (Test)formatter.Deserialize(ms);
                 }
-
-                TakeTest();
             }
             else if (Encoding.UTF8.GetString(answer) == "q")
             {
@@ -172,8 +182,6 @@ namespace TestClient
                     BinaryFormatter formatter = new BinaryFormatter();
                     CurrentQuestions = (Question[])formatter.Deserialize(ms);
                 }
-
-                TakeTest();
             }
             else if (Encoding.UTF8.GetString(answer) == "n")
             {
@@ -192,9 +200,10 @@ namespace TestClient
 
         private void TakeTest()
         {
-            if(CurrentTest != null && CurrentAnswers != null && CurrentQuestions != null)
+            if (CurrentTest != null && CurrentAnswers != null && CurrentQuestions != null)
             {
                 Dispatcher.Invoke(() => {
+                    IsLoadingLabel.Visibility = Visibility.Hidden;
                     TestingWindow window = new TestingWindow(CurrentTest, CurrentQuestions, CurrentAnswers);
                     window.ShowDialog();
                 });
@@ -205,6 +214,7 @@ namespace TestClient
         {
             if (Client != null && TestsDataGrid.SelectedIndex >= 0)
             {
+                IsLoadingLabel.Visibility = Visibility.Visible;
                 SendMsg($"take test|{assignedTests[TestsDataGrid.SelectedIndex].Id}");
             }
         }

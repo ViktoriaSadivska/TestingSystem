@@ -29,7 +29,8 @@
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="2" Orientation="Horizontal" Grid.ColumnSpan="3">
-            <Label Content="Taken tests:" FontWeight="Bold" Margin="9" Width="440"/>
+            <Label Content="Taken tests:" FontWeight="Bold" Margin="9" Width="330"/>
+            <Label Content="Test is loading..." Margin="9" Visibility="Hidden" Name="IsLoadingLabel"/>
             <Button Name ="TakeTestButton" Background="CornflowerBlue" FontWeight="Bold" Click="TakeTestButton_Click" Width="120" Margin="5" Content="Take test" Height="25"/>
         </StackPanel>
         <DataGrid Grid.Row="3" Margin="5,5,5,5" Background="White" AutoGenerateColumns="False" Name="ResultsDataGrid" Grid.ColumnSpan="3">

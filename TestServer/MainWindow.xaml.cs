@@ -61,7 +61,7 @@ namespace TestServer
                     stream.ReadTimeout = -1;
                     stream.WriteTimeout = -1;
                     int length;
-                    byte[] buffer = new byte[8000];
+                    byte[] buffer = new byte[2000];
                     List<DataPart> dataParts = new List<DataPart>();
                     DataPart dataPart;
                     try
@@ -85,7 +85,7 @@ namespace TestServer
                                     for (int i = 1; i < dataParts.Count; i++)
                                         data = data.Concat(dataParts[i].Buffer).ToArray();
 
-                                ChooseAnswer(Encoding.UTF8.GetString(data), connectedTcpClient);
+                                    ChooseAnswer(Encoding.UTF8.GetString(data), connectedTcpClient);
                                     dataParts.Clear();
                                 }
                             }
@@ -105,24 +105,43 @@ namespace TestServer
             }
             else if (clientMessage == "assigned tests")
             {
-                byte[] msg = Encoding.ASCII.GetBytes("a").Concat(GetTests(client)).ToArray();
+                byte[] msg = Encoding.UTF8.GetBytes("a").Concat(GetTests(client)).ToArray();
                 AnswerClient(msg, client);
             }
             else if (clientMessage == "test results")
             {
-                byte[] msg = Encoding.ASCII.GetBytes("r").Concat(GetResults(client)).ToArray();
+                byte[] msg = Encoding.UTF8.GetBytes("r").Concat(GetResults(client)).ToArray();
                 AnswerClient(msg, client);
             }
             else if (clientMessage.StartsWith("take test"))
             {
-                byte[] msg;
-                msg = Encoding.UTF8.GetBytes("t").Concat(GetTest(client, clientMessage)).ToArray();
+                byte[] msg = Encoding.UTF8.GetBytes("t").Concat(GetTest(client, clientMessage)).ToArray();
                 AnswerClient(msg, client);
+
                 msg = Encoding.UTF8.GetBytes("q").Concat(GetQuestions(client, clientMessage)).ToArray();
                 AnswerClient(msg, client);
+
                 msg = Encoding.UTF8.GetBytes("n").Concat(GetAnswers(client, clientMessage)).ToArray();
                 AnswerClient(msg, client);
-            }
+
+                //msg = new byte[2500];
+                //for(int bi=0; bi<2500; bi++)
+                //{
+                //    if (bi < 800) msg[bi] = 0x01;
+                //    else if (bi < 1600) msg[bi] = 0x2;
+                //    else if (bi < 2400) msg[bi] = 0x3;
+                //    else msg[bi] = 0x4;
+                //}
+
+                //AnswerClient(msg, client);
+
+/*                msg = new byte[7980];
+                AnswerClient(msg, client);
+                msg = new byte[2500];
+                AnswerClient(msg, client);
+                msg = new byte[7980];
+                AnswerClient(msg, client);
+*/            }
         }
 
         private byte[] GetAnswers(TcpClient client, string clientMessage)
@@ -132,9 +151,9 @@ namespace TestServer
                 BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream();
                 cnt.Configuration.ProxyCreationEnabled = false;
-
                 string login = ClientId[client].Split(" | ")[0];
                 int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
+
                 List<Question> questions = cnt.Questions.Where(x => x.idTest == testId).ToList();
                 List<Answer> answers = new List<Answer>();
                 foreach (var qstn in questions)
@@ -155,12 +174,13 @@ namespace TestServer
             {
                 BinaryFormatter formatter = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream();
-
                 cnt.Configuration.ProxyCreationEnabled = false;
                 string login = ClientId[client].Split(" | ")[0];
                 int testId = Convert.ToInt32(clientMessage.Split('|')[1]);
+
                 Question[] questions = cnt.Questions.Where(x => x.idTest == testId).ToArray();
                 formatter.Serialize(ms, questions);
+                 
 
                 cnt.Configuration.ProxyCreationEnabled = true;
                 return ms.ToArray();
@@ -169,8 +189,11 @@ namespace TestServer
 
         private void AnswerClient(byte[] msg, TcpClient client)
         {
-            byte[][] bufferArray = DataPart.BufferSplit(msg, 1024);
+            byte[][] bufferArray = DataPart.BufferSplit(msg, 8000);
             string id = DataPart.GenerateId();
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            NetworkStream stream = client.GetStream();
+
             for (int i = 0; i < bufferArray.Length; ++i)
             {
                 DataPart dataPart = new DataPart()
@@ -183,11 +206,20 @@ namespace TestServer
                 byte[] dataPartArr;
                 using (MemoryStream ms = new MemoryStream())
                 {
-                    new BinaryFormatter().Serialize(ms, dataPart);
+                    binaryFormatter.Serialize(ms, dataPart);
                     dataPartArr = ms.ToArray();
                 }
-                NetworkStream stream = client.GetStream();
                 stream.Write(dataPartArr, 0, dataPartArr.Length);
+
+                //TextWriter tw = new StreamWriter("server.txt", true);
+                //FileStream bf = new FileStream("server.dat", FileMode.Append);
+
+                //tw.WriteLine(dataPartArr.Length);
+                //bf.Write(dataPartArr, 0, dataPartArr.Length);
+                //tw.Close();
+                //bf.Close();
+
+                Thread.Sleep(100);
             }
         }
 
