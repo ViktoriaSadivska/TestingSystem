@@ -23,7 +23,8 @@ namespace TestClient
     {
         Test Test { get; set; }
         List<Question> Questions { get; set; }
-        Dictionary<int,ObservableCollection<UserAnswer>> QuestionAnswers { get; set; }
+        public Dictionary<int,ObservableCollection<UserAnswer>> QuestionAnswers { get; set; }
+
         List<Button> buttons { get; set; } = new List<Button>();
         public TestingWindow(Test test, Question[] questions, Answer[] answers)
         {
@@ -44,6 +45,7 @@ namespace TestClient
             InitializeData();
         }
 
+        //initializer
         private void InitializeData()
         {
             AuthorTextBox.Text = Test.Author;
@@ -62,26 +64,30 @@ namespace TestClient
             }
         }
 
+        //clicks
         private void TestingWindow_Click(object sender, RoutedEventArgs e)
         {
             int ind = buttons.IndexOf(sender as Button);
             QuestionLabel.Content = Questions[ind].Text;
 
-            using (MemoryStream ms = new MemoryStream(Questions[ind].Image))
+            if (Questions[ind].Image != null)
             {
-                BitmapImage btmp = new BitmapImage();
-                btmp.BeginInit();
-                btmp.CacheOption = BitmapCacheOption.OnLoad;
-                btmp.StreamSource = ms;
-                btmp.EndInit();
-                TestImage.Source = btmp;
+                using (MemoryStream ms = new MemoryStream(Questions[ind].Image))
+                {
+                    BitmapImage btmp = new BitmapImage();
+                    btmp.BeginInit();
+                    btmp.CacheOption = BitmapCacheOption.OnLoad;
+                    btmp.StreamSource = ms;
+                    btmp.EndInit();
+                    TestImage.Source = btmp;
+                }
             }
             AnswersDataGrid.ItemsSource = QuestionAnswers[Questions[ind].Id];
         }
-
         private void FinishButton_Click(object sender, RoutedEventArgs e)
         {
-
+            DialogResult = true;
+            this.Close();
         }
         private void OnChecked(object sender, RoutedEventArgs e)
         {

@@ -27,6 +27,8 @@ namespace TestServer
         {
             InitializeComponent();
         }
+
+        //button clicks
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             using (MyDBContext cnt = new MyDBContext())

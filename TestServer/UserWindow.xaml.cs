@@ -54,7 +54,6 @@ namespace TestServer
             DialogResult = true;
             this.Close();
         }
-
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

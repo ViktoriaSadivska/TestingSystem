@@ -53,6 +53,8 @@ namespace TestServer
 
             UsersDataGrid.ItemsSource = users;
         }
+
+        //button clicks
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             group.Name = GroupNameTextBox.Text;
@@ -60,7 +62,6 @@ namespace TestServer
             DialogResult = true;
             this.Close();
         }
-
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;

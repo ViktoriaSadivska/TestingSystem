@@ -12,10 +12,11 @@
             <TabItem Header="Groups and users" FontWeight="Bold">
                 <Grid Background="LightSteelBlue">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="5*"/>
+                        <ColumnDefinition Width="66*"/>
+                        <ColumnDefinition Width="161*"/>
+                        <ColumnDefinition Width="567*"/>
                     </Grid.ColumnDefinitions>
-                    <ListView Grid.Column="0" Margin="5" Name="GroupsListView">
+                    <ListView Grid.Column="0" Margin="5,5,5,5" Name="GroupsListView" Grid.ColumnSpan="2">
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="Add group" Name="AddGroupButton" Click="AddGroupButton_Click"/>
@@ -24,7 +25,7 @@
                             </ContextMenu>
                         </ListView.ContextMenu>
                     </ListView>
-                    <Grid Grid.Column="1">
+                    <Grid Grid.Column="2">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="4*"/>
                             <RowDefinition Height="*"/>
@@ -41,7 +42,7 @@
                             <Button Content="Add user" Background="AliceBlue" Width="120" Margin="20" Name="AddUserButton" Click="AddUserButton_Click"/>
                             <Button Content="Edit user" Background="AliceBlue" Width="120" Margin="20" Name="EditUserButton" Click="EditUserButton_Click"/>
                         </StackPanel>
-                     </Grid>
+                    </Grid>
                 </Grid>
             </TabItem>
             <TabItem Header="Tests" FontWeight="Bold">
